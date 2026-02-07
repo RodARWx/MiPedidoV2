@@ -82,4 +82,21 @@ public class PedidoController {
         return "redirect:/pedidos/" + idPedido;
     }
 
+    @GetMapping("/pedidos/eliminar_detalle/{id}")
+    public String eliminarDetalle(@PathVariable Long id,
+            @RequestParam Long idPedido) {
+
+        pedidoService.eliminarDetalle(id, idPedido);
+        return "redirect:/pedidos/" + idPedido;
+    }
+
+    @PostMapping("/pedidos/actualizar_cantidad")
+    public String actualizarCantidad(@RequestParam Long idDetalle,
+            @RequestParam int cantidad,
+            @RequestParam Long idPedido) {
+
+        pedidoService.actualizarCantidad(idDetalle, cantidad);
+        return "redirect:/pedidos/" + idPedido;
+    }
+
 }

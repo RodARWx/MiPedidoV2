@@ -1,74 +1,138 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="ISO-8859-1">
-        <title>Detalle del Pedido</title>
-        <link rel="stylesheet"
-              href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-    </head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-    <body>
-        <div class="container">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Detalle del Pedido</title>
 
-            <h1 class="mt-4">Pedido #<span th:text="${pedido.idPedido}"></span></h1>
-            <h4>Cliente: <span th:text="${pedido.cliente}"></span></h4>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          crossorigin="anonymous">
+</head>
 
-            <hr>
+<body>
+<div class="container">
 
-            <h3>Agregar Producto</h3>
+    <!-- CABECERA -->
+    <h1 class="mt-4">
+        Pedido #<span th:text="${pedido.idPedido}"></span>
+    </h1>
+    <h4>
+        Cliente: <span th:text="${pedido.cliente}"></span>
+    </h4>
 
-            <form th:action="@{/pedidos/agregar_producto}" method="POST">
+    <hr>
 
-                <input type="hidden" name="idPedido" th:value="${pedido.idPedido}"/>
+    <!-- AGREGAR PRODUCTO -->
+    <h3>Agregar Producto</h3>
 
-                <select name="idProducto" class="form-control mb-2 col-4">
+    <form th:action="@{/pedidos/agregar_producto}" method="POST" class="mb-4">
+
+        <input type="hidden" name="idPedido" th:value="${pedido.idPedido}"/>
+
+        <div class="form-row align-items-end">
+
+            <div class="form-group col-md-4">
+                <label>Producto</label>
+                <select name="idProducto" class="form-control" required>
+                    <option value="">Seleccione un producto</option>
                     <option th:each="prod : ${productos}"
                             th:value="${prod.idProducto}"
                             th:text="${prod.nombre}">
                     </option>
                 </select>
+            </div>
 
+            <div class="form-group col-md-2">
+                <label>Cantidad</label>
                 <input type="number"
                        name="cantidad"
-                       placeholder="Cantidad"
-                       class="form-control mb-2 col-4"/>
+                       min="1"
+                       class="form-control"
+                       required>
+            </div>
 
+            <div class="form-group col-md-2">
                 <button class="btn btn-success">
                     Agregar
                 </button>
-            </form>
-
-            <hr>
-
-            <h3>Productos del Pedido</h3>
-
-            <table class="table table-bordered">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th>Cantidad</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr th:each="d : ${detalles}">
-                        <td th:text="${d.producto.nombre}"></td>
-                        <td th:text="${d.producto.precio}"></td>
-                        <td th:text="${d.cantidad}"></td>
-                        <td th:text="${d.subtotal}"></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3>Total: $<span th:text="${pedido.total}"></span></h3>
-
-            <a th:href="@{/listar_pedidos}" class="btn btn-secondary">
-                Volver
-            </a>
-
+            </div>
 
         </div>
-    </body>
+    </form>
+
+    <hr>
+
+    <!-- DETALLES DEL PEDIDO -->
+    <h3>Productos del Pedido</h3>
+
+    <table class="table table-bordered table-striped">
+
+        <thead class="thead-dark">
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr th:each="d : ${detalles}">
+            <td th:text="${d.producto.nombre}"></td>
+            <td th:text="${d.producto.precio}"></td>
+
+            <!-- ACTUALIZAR CANTIDAD -->
+            <td>
+                <form th:action="@{/pedidos/actualizar_cantidad}"
+                      method="POST"
+                      class="form-inline">
+
+                    <input type="hidden" name="idDetalle" th:value="${d.idDetalle}">
+                    <input type="hidden" name="idPedido" th:value="${pedido.idPedido}">
+
+                    <input type="number"
+                           name="cantidad"
+                           min="1"
+                           th:value="${d.cantidad}"
+                           class="form-control mr-2"
+                           style="width:80px">
+
+                    <button class="btn btn-warning btn-sm">
+                        Actualizar
+                    </button>
+                </form>
+            </td>
+
+            <td th:text="${d.subtotal}"></td>
+
+            <!-- ELIMINAR -->
+            <td>
+                <a th:href="@{/pedidos/eliminar_detalle/{id}(id=${d.idDetalle},idPedido=${pedido.idPedido})}"
+                   class="btn btn-danger btn-sm">
+                    Quitar
+                </a>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    <!-- TOTAL -->
+    <h3 class="mt-3">
+        Total: $
+        <span th:text="${pedido.total}"></span>
+    </h3>
+
+    <hr>
+
+    <!-- NAVEGACIÓN -->
+    <a th:href="@{/listar_pedidos}" class="btn btn-secondary">
+        Volver a pedidos
+    </a>
+
+</div>
+</body>
 </html>

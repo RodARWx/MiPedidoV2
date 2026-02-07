@@ -50,4 +50,5 @@ public class ProductoController {
         productoService.eliminar(id);
         return "redirect:/listar_productos";
     }
+    
 }

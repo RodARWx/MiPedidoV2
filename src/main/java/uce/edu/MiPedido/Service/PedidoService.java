@@ -50,22 +50,56 @@ public class PedidoService {
             return;
         }
 
-        DetallePedido detalle = new DetallePedido();
-        detalle.setPedido(pedido);
-        detalle.setProducto(producto);
-        detalle.setCantidad(cantidad);
+        DetallePedido detalle = detallePedidoRepository
+                .findByPedidoIdPedidoAndProductoIdProducto(idPedido, idProducto)
+                .orElse(null);
 
-        //calcular subtotal
-        double subtotal = producto.getPrecio() * cantidad;
-        detalle.setSubtotal(subtotal);
+        if (detalle != null) {
+            // ya existe → solo sumar cantidad
+            detalle.setCantidad(detalle.getCantidad() + cantidad);
+            detalle.setSubtotal(detalle.getCantidad() * producto.getPrecio());
+        } else {
+            // nuevo detalle
+            detalle = new DetallePedido();
+            detalle.setPedido(pedido);
+            detalle.setProducto(producto);
+            detalle.setCantidad(cantidad);
+            detalle.setSubtotal(producto.getPrecio() * cantidad);
+        }
 
         detallePedidoRepository.save(detalle);
 
-        //recalcular total del pedido
-        double total = calcularTotalPedido(pedido);
-        pedido.setTotal(total);
-
+        // recalcular total
+        pedido.setTotal(calcularTotalPedido(pedido));
         pedidoRepository.save(pedido);
+    }
+
+    public void actualizarCantidad(Long idDetalle, int cantidad) {
+
+        DetallePedido detalle = detallePedidoRepository.findById(idDetalle).orElse(null);
+        if (detalle == null || cantidad <= 0) {
+            return;
+        }
+
+        detalle.setCantidad(cantidad);
+        detalle.setSubtotal(cantidad * detalle.getProducto().getPrecio());
+
+        detallePedidoRepository.save(detalle);
+
+        Pedido pedido = detalle.getPedido();
+        pedido.setTotal(calcularTotalPedido(pedido));
+        pedidoRepository.save(pedido);
+    }
+
+    public void eliminarDetalle(Long idDetalle, Long idPedido) {
+
+        detallePedidoRepository.deleteById(idDetalle);
+
+        Pedido pedido = pedidoRepository.findById(idPedido).orElse(null);
+        if (pedido != null) {
+            pedido.setTotal(calcularTotalPedido(pedido));
+            pedidoRepository.save(pedido);
+        }
     }
 
 }
