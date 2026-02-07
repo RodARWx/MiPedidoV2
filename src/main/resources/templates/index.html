@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="ISO-8859-1">
+    <title>MiPedido - Inicio</title>
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          crossorigin="anonymous">
+</head>
+
+<body>
+<div class="container">
+
+    <h1 class="mt-5">Sistema MiPedido</h1>
+    <p class="lead">
+        Sistema de gestión de pedidos para restaurante
+    </p>
+
+    <hr>
+
+    <div class="list-group col-4">
+
+        <a th:href="@{/productos}"
+           class="list-group-item list-group-item-action">
+            Productos
+        </a>
+
+        <a th:href="@{/pedidos}"
+           class="list-group-item list-group-item-action">
+            Pedidos
+        </a>
+
+    </div>
+
+    <hr>
+
+    <p class="text-muted">
+        Proyecto académico - Spring Boot + JPA + PostgreSQL
+    </p>
+
+</div>
+</body>
+</html>
