@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import uce.edu.MiPedido.Model.Pedido;
 import uce.edu.MiPedido.Repository.PedidoRepository;
 import uce.edu.MiPedido.Service.PedidoService;
+import uce.edu.MiPedido.Service.ProductoService;
 
 @Controller
 public class PedidoController {
@@ -19,6 +21,9 @@ public class PedidoController {
 
     @Autowired
     private PedidoService pedidoService;
+
+    @Autowired
+    private ProductoService productoService;
 
     //Menú de pedidos
     @GetMapping("/pedidos")
@@ -53,4 +58,28 @@ public class PedidoController {
         pedidoRepository.deleteById(id);
         return "redirect:/listar_pedidos";
     }
+
+    //Ver pedido + detalles
+    @GetMapping("/pedidos/{id}")
+    public String verPedido(@PathVariable Long id, Model model) {
+
+        Pedido pedido = pedidoRepository.findById(id).orElse(null);
+
+        model.addAttribute("pedido", pedido);
+        model.addAttribute("detalles", pedido.getDetalles());
+        model.addAttribute("productos", productoService.listarDisponibles());
+
+        return "detalle_pedido";
+    }
+
+    //Agregar producto al pedido
+    @PostMapping("/pedidos/agregar_producto")
+    public String agregarProducto(@RequestParam Long idPedido,
+            @RequestParam Long idProducto,
+            @RequestParam int cantidad) {
+
+        pedidoService.agregarProductoAPedido(idPedido, idProducto, cantidad);
+        return "redirect:/pedidos/" + idPedido;
+    }
+
 }

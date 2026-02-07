@@ -70,4 +70,10 @@ public class DetallePedido {
     public void setSubtotal(double subtotal) {
         this.subtotal = subtotal;
     }
+
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
+    
+    
 }

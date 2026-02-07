@@ -1,58 +1,63 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="ISO-8859-1">
-    <title>Listado de Pedidos</title>
+    <head>
+        <meta charset="ISO-8859-1">
+        <title>Listado de Pedidos</title>
 
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          crossorigin="anonymous">
-</head>
+        <link rel="stylesheet"
+              href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+              crossorigin="anonymous">
+    </head>
 
-<body>
-<div class="container">
+    <body>
+        <div class="container">
 
-    <h1 class="mt-4">Listado de Pedidos</h1>
-    <hr>
+            <h1 class="mt-4">Listado de Pedidos</h1>
+            <hr>
 
-    <table class="table table-bordered table-striped">
-        <thead class="thead-dark">
-        <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
 
-        <tbody>
-        <tr th:each="pedido : ${listaPedidos}">
-            <td th:text="${pedido.idPedido}"></td>
-            <td th:text="${pedido.cliente}"></td>
-            <td th:text="${pedido.fecha}"></td>
-            <td th:text="${pedido.total}"></td>
-            <td>
-                <a th:href="@{/eliminar_pedido/{id}(id=${pedido.idPedido})}"
-                   class="btn btn-danger btn-sm">
-                    Eliminar
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+                <tbody>
+                    <tr th:each="pedido : ${listaPedidos}">
+                        <td th:text="${pedido.idPedido}"></td>
+                        <td th:text="${pedido.cliente}"></td>
+                        <td th:text="${pedido.fecha}"></td>
+                        <td th:text="${pedido.total}"></td>
+                        <td>
+                            <a th:href="@{/pedidos/{id}(id=${pedido.idPedido})}"
+                               class="btn btn-info btn-sm">
+                                Ver
+                            </a>
 
-    <hr>
+                            <a th:href="@{/eliminar_pedido/{id}(id=${pedido.idPedido})}"
+                               class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-    <a th:href="@{/nuevo_pedido}" class="btn btn-primary">
-        Nuevo Pedido
-    </a>
+            <hr>
 
-    <a th:href="@{/pedidos}" class="btn btn-secondary">
-        Volver al menú Pedidos
-    </a>
+            <a th:href="@{/nuevo_pedido}" class="btn btn-primary">
+                Nuevo Pedido
+            </a>
 
-</div>
-</body>
+            <a th:href="@{/pedidos}" class="btn btn-secondary">
+                Volver al menú Pedidos
+            </a>
+
+        </div>
+    </body>
 </html>

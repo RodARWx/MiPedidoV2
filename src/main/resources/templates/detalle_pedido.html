@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="ISO-8859-1">
+        <title>Detalle del Pedido</title>
+        <link rel="stylesheet"
+              href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    </head>
+
+    <body>
+        <div class="container">
+
+            <h1 class="mt-4">Pedido #<span th:text="${pedido.idPedido}"></span></h1>
+            <h4>Cliente: <span th:text="${pedido.cliente}"></span></h4>
+
+            <hr>
+
+            <h3>Agregar Producto</h3>
+
+            <form th:action="@{/pedidos/agregar_producto}" method="POST">
+
+                <input type="hidden" name="idPedido" th:value="${pedido.idPedido}"/>
+
+                <select name="idProducto" class="form-control mb-2 col-4">
+                    <option th:each="prod : ${productos}"
+                            th:value="${prod.idProducto}"
+                            th:text="${prod.nombre}">
+                    </option>
+                </select>
+
+                <input type="number"
+                       name="cantidad"
+                       placeholder="Cantidad"
+                       class="form-control mb-2 col-4"/>
+
+                <button class="btn btn-success">
+                    Agregar
+                </button>
+            </form>
+
+            <hr>
+
+            <h3>Productos del Pedido</h3>
+
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="d : ${detalles}">
+                        <td th:text="${d.producto.nombre}"></td>
+                        <td th:text="${d.producto.precio}"></td>
+                        <td th:text="${d.cantidad}"></td>
+                        <td th:text="${d.subtotal}"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Total: $<span th:text="${pedido.total}"></span></h3>
+
+            <a th:href="@{/listar_pedidos}" class="btn btn-secondary">
+                Volver
+            </a>
+
+
+        </div>
+    </body>
+</html>
