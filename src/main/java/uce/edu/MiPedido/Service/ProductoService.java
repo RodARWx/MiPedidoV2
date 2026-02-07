@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uce.edu.MiPedido.Model.Producto;
 import uce.edu.MiPedido.Repository.ProductoRepository;
 
-
 @Service
 public class ProductoService {
 
@@ -55,5 +54,15 @@ public class ProductoService {
     public void eliminar(Long id) {
         productoRepository.deleteById(id);
     }
-    
+
+    public void cambiarDisponibilidad(Long idProducto) {
+
+        Producto producto = productoRepository.findById(idProducto).orElse(null);
+
+        if (producto != null) {
+            producto.setDisponible(!producto.isDisponible());
+            productoRepository.save(producto);
+        }
+    }
+
 }

@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -26,6 +28,10 @@ public class Producto {
 
     @Column(nullable = false)
     private boolean disponible;
+
+    @ManyToOne
+    @JoinColumn(name = "id_categoria")
+    private Categoria categoria;
 
     public Producto() {
     }
@@ -69,6 +75,12 @@ public class Producto {
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
     }
-    
-    
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
 }

@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="ISO-8859-1">
+    <meta charset="ISO-88599-1">
     <title>Listado de Productos</title>
 
     <link rel="stylesheet"
@@ -17,29 +17,54 @@
     <hr>
 
     <table class="table table-bordered table-striped">
+
         <thead class="thead-dark">
         <tr>
             <th>ID</th>
             <th>Nombre</th>
             <th>Precio</th>
             <th>Tipo</th>
-            <th>Disponible</th>
+            <th>Estado</th>
             <th>Acciones</th>
         </tr>
         </thead>
 
         <tbody>
         <tr th:each="producto : ${listaProductos}">
+
             <td th:text="${producto.idProducto}"></td>
             <td th:text="${producto.nombre}"></td>
             <td th:text="${producto.precio}"></td>
             <td th:text="${producto.tipo}"></td>
-            <td th:text="${producto.disponible}"></td>
+
+            <!-- ESTADO -->
             <td>
+                <span th:if="${producto.disponible}"
+                      class="badge badge-success">
+                    Disponible
+                </span>
+
+                <span th:if="${!producto.disponible}"
+                      class="badge badge-danger">
+                    No disponible
+                </span>
+            </td>
+
+            <!-- ACCIONES -->
+            <td>
+
+                <!-- Cambiar disponibilidad -->
+                <a th:href="@{/producto/cambiar_disponibilidad/{id}(id=${producto.idProducto})}"
+                   class="btn btn-warning btn-sm mb-1">
+                    Cambiar estado
+                </a>
+
+                <!-- Eliminar (opcional) -->
                 <a th:href="@{/eliminar_producto/{id}(id=${producto.idProducto})}"
-                   class="btn btn-danger btn-sm">
+                   class="btn btn-danger btn-sm mb-1">
                     Eliminar
                 </a>
+
             </td>
         </tr>
         </tbody>
@@ -52,7 +77,7 @@
     </a>
 
     <a th:href="@{/productos}" class="btn btn-secondary">
-        Volver al menú Productos
+        Volver al menÃº Productos
     </a>
 
 </div>

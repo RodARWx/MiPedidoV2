@@ -1,6 +1,5 @@
 package uce.edu.MiPedido.Controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,5 +49,11 @@ public class ProductoController {
         productoService.eliminar(id);
         return "redirect:/listar_productos";
     }
-    
+
+    @GetMapping("/producto/cambiar_disponibilidad/{id}")
+    public String cambiarDisponibilidad(@PathVariable Long id) {
+        productoService.cambiarDisponibilidad(id);
+        return "redirect:/listar_productos";
+    }
+
 }
