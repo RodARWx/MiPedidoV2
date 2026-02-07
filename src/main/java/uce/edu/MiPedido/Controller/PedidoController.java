@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uce.edu.MiPedido.Model.Pedido;
 import uce.edu.MiPedido.Repository.PedidoRepository;
 import uce.edu.MiPedido.Service.PedidoService;
@@ -49,7 +50,7 @@ public class PedidoController {
     @PostMapping("/guardar_pedido")
     public String guardarPedido(@ModelAttribute Pedido pedido) {
         pedidoRepository.save(pedido);
-        return "redirect:/listar_pedidos";
+        return "redirect:/pedidos/" + pedido.getIdPedido();
     }
 
     //Eliminar pedido
@@ -73,20 +74,32 @@ public class PedidoController {
     }
 
     //Agregar producto al pedido
-    @PostMapping("/pedidos/agregar_producto")
-    public String agregarProducto(@RequestParam Long idPedido,
+    @PostMapping("/agregar_producto")
+    public String agregarProducto(
+            @RequestParam Long idPedido,
             @RequestParam Long idProducto,
-            @RequestParam int cantidad) {
-
-        pedidoService.agregarProductoAPedido(idPedido, idProducto, cantidad);
+            @RequestParam int cantidad,
+            RedirectAttributes redirect
+    ) {
+        try {
+            pedidoService.agregarProductoAPedido(idPedido, idProducto, cantidad);
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/pedidos/" + idPedido;
     }
 
-    @GetMapping("/pedidos/eliminar_detalle/{id}")
-    public String eliminarDetalle(@PathVariable Long id,
-            @RequestParam Long idPedido) {
-
-        pedidoService.eliminarDetalle(id, idPedido);
+    @PostMapping("/eliminar_detalle/{idDetalle}")
+    public String eliminarDetalle(
+            @PathVariable Long idDetalle,
+            @RequestParam Long idPedido,
+            RedirectAttributes redirect
+    ) {
+        try {
+            pedidoService.eliminarDetalle(idDetalle, idPedido);
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/pedidos/" + idPedido;
     }
 
@@ -97,6 +110,25 @@ public class PedidoController {
 
         pedidoService.actualizarCantidad(idDetalle, cantidad);
         return "redirect:/pedidos/" + idPedido;
+    }
+
+    @GetMapping("/pedido/confirmar/{id}")
+    public String confirmarPedido(@PathVariable Long id) {
+        pedidoService.confirmarPedido(id);
+        return "redirect:/pedidos/" + id;
+    }
+
+    @PostMapping("/pedidos/pagar/{id}")
+    public String pagarPedido(
+            @PathVariable Long id,
+            RedirectAttributes redirect
+    ) {
+        try {
+            pedidoService.pagarPedido(id);
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/pedidos/" + id;
     }
 
 }

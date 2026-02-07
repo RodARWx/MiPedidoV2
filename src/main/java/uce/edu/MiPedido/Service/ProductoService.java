@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uce.edu.MiPedido.Model.Categoria;
 import uce.edu.MiPedido.Model.Producto;
 import uce.edu.MiPedido.Repository.ProductoRepository;
 
@@ -18,8 +19,8 @@ public class ProductoService {
         return producto.getNombre() != null
                 && !producto.getNombre().isEmpty()
                 && producto.getPrecio() > 0
-                && producto.getTipo() != null
-                && !producto.getTipo().isEmpty();
+                && producto.getCategoria() != null
+                && producto.getCategoria().isActiva();
     }
 
     // Guardar producto
@@ -35,9 +36,14 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
-    // Listar productos por tipo (PLATO / BEBIDA)
-    public List<Producto> listarPorTipo(String tipo) {
-        return productoRepository.findByTipo(tipo);
+    // Listar productos por categoría
+    public List<Producto> listarPorCategoria(Categoria categoria) {
+        return productoRepository.findByCategoria(categoria);
+    }
+
+    // Listar productos disponibles por categoría
+    public List<Producto> listarDisponiblesPorCategoria(Categoria categoria) {
+        return productoRepository.findByCategoriaAndDisponibleTrue(categoria);
     }
 
     // Listar solo productos disponibles

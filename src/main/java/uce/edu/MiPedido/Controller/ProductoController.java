@@ -7,7 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import uce.edu.MiPedido.Model.Categoria;
 import uce.edu.MiPedido.Model.Producto;
+import uce.edu.MiPedido.Service.CategoriaService;
 import uce.edu.MiPedido.Service.ProductoService;
 
 @Controller
@@ -15,6 +18,9 @@ public class ProductoController {
 
     @Autowired
     private ProductoService productoService;
+
+    @Autowired
+    private CategoriaService categoriaService;
 
     //Menú principal de productos
     @GetMapping("/productos")
@@ -33,12 +39,18 @@ public class ProductoController {
     @GetMapping("/nuevo_producto")
     public String nuevoProducto(Model model) {
         model.addAttribute("producto", new Producto());
+        model.addAttribute("categorias", categoriaService.listarActivas());
         return "nuevo_producto";
     }
 
     //Guardar producto
     @PostMapping("/guardar_producto")
-    public String guardarProducto(@ModelAttribute Producto producto) {
+    public String guardarProducto(@ModelAttribute Producto producto,
+            @RequestParam("categoria") Long idCategoria) {
+
+        Categoria categoria = categoriaService.buscarPorId(idCategoria);
+        producto.setCategoria(categoria);
+
         productoService.guardar(producto);
         return "redirect:/listar_productos";
     }
@@ -54,6 +66,16 @@ public class ProductoController {
     public String cambiarDisponibilidad(@PathVariable Long id) {
         productoService.cambiarDisponibilidad(id);
         return "redirect:/listar_productos";
+    }
+
+    @GetMapping("/editar_producto/{id}")
+    public String editarProducto(@PathVariable Long id, Model model) {
+
+        Producto producto = productoService.buscarPorId(id);
+        model.addAttribute("producto", producto);
+        model.addAttribute("categorias", categoriaService.listarActivas());
+
+        return "editar_producto";
     }
 
 }

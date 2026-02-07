@@ -23,9 +23,6 @@ public class Producto {
     @Column(nullable = false)
     private double precio;
 
-    @Column(nullable = false, length = 20)
-    private String tipo;   // PLATO o BEBIDA
-
     @Column(nullable = false)
     private boolean disponible;
 
@@ -58,14 +55,6 @@ public class Producto {
 
     public void setPrecio(double precio) {
         this.precio = precio;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
     }
 
     public boolean isDisponible() {

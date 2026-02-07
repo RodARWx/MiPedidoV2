@@ -21,6 +21,10 @@ public class Pedido {
     @Column(nullable = false)
     private double total;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoPedido estado;
+
     // Relación con detalle del pedido
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<DetallePedido> detalles;
@@ -29,7 +33,7 @@ public class Pedido {
         this.fecha = LocalDateTime.now();
         this.total = 0;
     }
-    
+
     public Long getIdPedido() {
         return idPedido;
     }
@@ -69,4 +73,19 @@ public class Pedido {
     public void setDetalles(List<DetallePedido> detalles) {
         this.detalles = detalles;
     }
+
+    public EstadoPedido getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoPedido estado) {
+        this.estado = estado;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.estado = EstadoPedido.ABIERTO;
+        this.fecha = LocalDateTime.now();
+    }
+
 }

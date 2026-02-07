@@ -3,6 +3,7 @@ package uce.edu.MiPedido.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uce.edu.MiPedido.Model.DetallePedido;
+import uce.edu.MiPedido.Model.EstadoPedido;
 import uce.edu.MiPedido.Model.Pedido;
 import uce.edu.MiPedido.Model.Producto;
 import uce.edu.MiPedido.Repository.DetallePedidoRepository;
@@ -11,6 +12,15 @@ import uce.edu.MiPedido.Repository.ProductoRepository;
 
 @Service
 public class PedidoService {
+
+    @Autowired
+    private DetallePedidoRepository detallePedidoRepository;
+
+    @Autowired
+    private PedidoRepository pedidoRepository;
+
+    @Autowired
+    private ProductoRepository productoRepository;
 
     // Calcula el subtotal de un detalle
     public double calcularSubtotal(Producto producto, int cantidad) {
@@ -32,15 +42,6 @@ public class PedidoService {
                 .sum();
     }
 
-    @Autowired
-    private DetallePedidoRepository detallePedidoRepository;
-
-    @Autowired
-    private PedidoRepository pedidoRepository;
-
-    @Autowired
-    private ProductoRepository productoRepository;
-
     public void agregarProductoAPedido(Long idPedido, Long idProducto, int cantidad) {
 
         Pedido pedido = pedidoRepository.findById(idPedido).orElse(null);
@@ -50,16 +51,17 @@ public class PedidoService {
             return;
         }
 
+        //VALIDAR ANTES DE MODIFICAR
+        validarPedidoEditable(pedido);
+
         DetallePedido detalle = detallePedidoRepository
                 .findByPedidoIdPedidoAndProductoIdProducto(idPedido, idProducto)
                 .orElse(null);
 
         if (detalle != null) {
-            // ya existe → solo sumar cantidad
             detalle.setCantidad(detalle.getCantidad() + cantidad);
             detalle.setSubtotal(detalle.getCantidad() * producto.getPrecio());
         } else {
-            // nuevo detalle
             detalle = new DetallePedido();
             detalle.setPedido(pedido);
             detalle.setProducto(producto);
@@ -81,25 +83,61 @@ public class PedidoService {
             return;
         }
 
+        Pedido pedido = detalle.getPedido();
+        validarPedidoEditable(pedido);
+
         detalle.setCantidad(cantidad);
         detalle.setSubtotal(cantidad * detalle.getProducto().getPrecio());
 
         detallePedidoRepository.save(detalle);
 
-        Pedido pedido = detalle.getPedido();
         pedido.setTotal(calcularTotalPedido(pedido));
         pedidoRepository.save(pedido);
     }
 
     public void eliminarDetalle(Long idDetalle, Long idPedido) {
 
+        Pedido pedido = pedidoRepository.findById(idPedido).orElse(null);
+
+        if (pedido == null) {
+            return;
+        }
+
+        //VALIDAR ANTES DE BORRAR
+        validarPedidoEditable(pedido);
+
         detallePedidoRepository.deleteById(idDetalle);
 
-        Pedido pedido = pedidoRepository.findById(idPedido).orElse(null);
-        if (pedido != null) {
-            pedido.setTotal(calcularTotalPedido(pedido));
+        pedido.setTotal(calcularTotalPedido(pedido));
+        pedidoRepository.save(pedido);
+    }
+
+    public Pedido buscarPorId(Long id) {
+        return pedidoRepository.findById(id).orElse(null);
+    }
+
+    private void validarPedidoEditable(Pedido pedido) {
+        if (pedido.getEstado() == EstadoPedido.PAGADO) {
+            throw new IllegalStateException(
+                    "El pedido ya fue pagado y no puede modificarse"
+            );
+        }
+    }
+
+    public void confirmarPedido(Long idPedido) {
+        Pedido pedido = buscarPorId(idPedido);
+
+        if (pedido.getEstado() == EstadoPedido.ABIERTO) {
+            pedido.setEstado(EstadoPedido.CONFIRMADO);
             pedidoRepository.save(pedido);
         }
+    }
+
+    public void pagarPedido(Long idPedido) {
+        Pedido pedido = buscarPorId(idPedido);
+
+        pedido.setEstado(EstadoPedido.PAGADO);
+        pedidoRepository.save(pedido);
     }
 
 }
