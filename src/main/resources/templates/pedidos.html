@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Pedidos</title>
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          crossorigin="anonymous">
+</head>
+
+<body>
+<div class="container">
+
+    <h1 class="mt-4">Módulo Pedidos</h1>
+    <hr>
+
+    <div class="list-group col-4">
+        <a th:href="@{/nuevo_pedido}" class="list-group-item list-group-item-action">
+            Nuevo Pedido
+        </a>
+
+        <a th:href="@{/listar_pedidos}" class="list-group-item list-group-item-action">
+            Listar Pedidos
+        </a>
+    </div>
+
+    <hr>
+    <a th:href="@{/}">Volver al inicio</a>
+
+</div>
+</body>
+</html>
