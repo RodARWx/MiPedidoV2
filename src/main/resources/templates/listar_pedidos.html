@@ -1,27 +1,29 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
     <head>
-        <meta charset="ISO-8859-1">
+        <meta charset="UTF-8">
         <title>Listado de Pedidos</title>
 
+        <!-- Bootstrap -->
         <link rel="stylesheet"
-              href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-              crossorigin="anonymous">
+              href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     </head>
 
-    <body>
-        <div class="container">
+    <body class="bg-light">
 
-            <h1 class="mt-4">Listado de Pedidos</h1>
-            <hr>
+        <div class="container mt-4">
 
-            <table class="table table-bordered table-striped">
-                <thead class="thead-dark">
+            <h2 class="mb-4">Listado de Pedidos</h2>
+
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Cliente</th>
-                        <th>Fecha</th>
+                        <th>Fecha / Hora</th>
+                        <th>Mesa</th>
+                        <th>Estado</th>
                         <th>Total</th>
                         <th>Acciones</th>
                     </tr>
@@ -29,35 +31,85 @@
 
                 <tbody>
                     <tr th:each="pedido : ${listaPedidos}">
+
+                        <!-- ID -->
                         <td th:text="${pedido.idPedido}"></td>
+
+                        <!-- Cliente -->
                         <td th:text="${pedido.cliente}"></td>
-                        <td th:text="${pedido.fecha}"></td>
-                        <td th:text="${pedido.total}"></td>
+
+                        <!-- Fecha y hora formateada -->
+                        <td th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}">
+                        </td>
+
+                        <!-- Mesa o Para llevar -->
+                        <td>
+                            <span th:if="${pedido.mesa != null}"
+                                  class="badge bg-secondary"
+                                  th:text="'Mesa ' + ${pedido.mesa.numero}">
+                            </span>
+
+                            <span th:if="${pedido.mesa == null}"
+                                  class="badge bg-dark">
+                                Para llevar
+                            </span>
+                        </td>
+
+                        <!-- Estado -->
+                        <td>
+                            <span class="badge"
+                                  th:text="${pedido.estado}"
+                                  th:classappend="
+                                  ${pedido.estado.name() == 'PAGADO'} ? 'bg-success' :
+                                  (${pedido.estado.name() == 'CANCELADO'} ? 'bg-secondary' :
+                                  (${pedido.estado.name() == 'CONFIRMADO'} ? 'bg-warning text-dark' :
+                                  'bg-primary'))">
+                            </span>
+                        </td>
+
+                        <!-- Total -->
+                        <td>
+                            $ <span th:text="${pedido.total}"></span>
+                        </td>
+
+                        <!-- Acciones -->
                         <td>
                             <a th:href="@{/pedidos/{id}(id=${pedido.idPedido})}"
-                               class="btn btn-info btn-sm">
+                               class="btn btn-sm btn-info">
                                 Ver
                             </a>
 
-                            <a th:href="@{/eliminar_pedido/{id}(id=${pedido.idPedido})}"
-                               class="btn btn-danger btn-sm">
+                            <!-- Eliminar solo si NO está pagado -->
+                            <a th:if="${pedido.estado.name() != 'PAGADO'}"
+                               th:href="@{/eliminar_pedido/{id}(id=${pedido.idPedido})}"
+                               class="btn btn-sm btn-danger">
                                 Eliminar
                             </a>
                         </td>
+
                     </tr>
+
+                    <!-- Si no hay pedidos -->
+                    <tr th:if="${listaPedidos.isEmpty()}">
+                        <td colspan="7" class="text-center text-muted">
+                            No existen pedidos registrados
+                        </td>
+                    </tr>
+
                 </tbody>
             </table>
 
-            <hr>
+            <div class="mt-3 d-flex gap-2">
+                <a th:href="@{/nuevo_pedido}" class="btn btn-primary">
+                    Nuevo Pedido
+                </a>
 
-            <a th:href="@{/nuevo_pedido}" class="btn btn-primary">
-                Nuevo Pedido
-            </a>
-
-            <a th:href="@{/pedidos}" class="btn btn-secondary">
-                Volver al men� Pedidos
-            </a>
+                <a th:href="@{/pedidos}" class="btn btn-secondary">
+                    Volver al menú
+                </a>
+            </div>
 
         </div>
+
     </body>
 </html>

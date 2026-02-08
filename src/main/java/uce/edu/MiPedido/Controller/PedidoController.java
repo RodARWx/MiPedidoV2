@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uce.edu.MiPedido.Model.Pedido;
 import uce.edu.MiPedido.Repository.PedidoRepository;
+import uce.edu.MiPedido.Service.MesaService;
 import uce.edu.MiPedido.Service.PedidoService;
 import uce.edu.MiPedido.Service.ProductoService;
 
@@ -25,6 +26,9 @@ public class PedidoController {
 
     @Autowired
     private ProductoService productoService;
+
+    @Autowired
+    private MesaService mesaService;
 
     //Menú de pedidos
     @GetMapping("/pedidos")
@@ -43,14 +47,23 @@ public class PedidoController {
     @GetMapping("/nuevo_pedido")
     public String nuevoPedido(Model model) {
         model.addAttribute("pedido", new Pedido());
+        model.addAttribute("mesasLibres", mesaService.listarLibres());
         return "nuevo_pedido";
     }
 
     //Guardar pedido
     @PostMapping("/guardar_pedido")
-    public String guardarPedido(@ModelAttribute Pedido pedido) {
-        pedidoRepository.save(pedido);
-        return "redirect:/pedidos/" + pedido.getIdPedido();
+    public String guardarPedido(
+            @ModelAttribute Pedido pedido,
+            RedirectAttributes redirect
+    ) {
+        try {
+            Pedido nuevo = pedidoService.crearPedido(pedido);
+            return "redirect:/pedidos/" + nuevo.getIdPedido();
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+            return "redirect:/nuevo_pedido";
+        }
     }
 
     //Eliminar pedido
@@ -125,6 +138,19 @@ public class PedidoController {
     ) {
         try {
             pedidoService.pagarPedido(id);
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/pedidos/" + id;
+    }
+
+    @GetMapping("/pedido/cancelar/{id}")
+    public String cancelarPedido(
+            @PathVariable Long id,
+            RedirectAttributes redirect
+    ) {
+        try {
+            pedidoService.cancelarPedido(id);
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute("error", e.getMessage());
         }

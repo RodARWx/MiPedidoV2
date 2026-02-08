@@ -56,11 +56,12 @@ public class ProductoService {
         return productoRepository.findById(id).orElse(null);
     }
 
+    //No se puede eliminar un producto porque esta referenciado en un pedido
     // Eliminar producto
-    public void eliminar(Long id) {
+    /*public void eliminar(Long id) {
         productoRepository.deleteById(id);
-    }
-
+    }*/
+    
     public void cambiarDisponibilidad(Long idProducto) {
 
         Producto producto = productoRepository.findById(idProducto).orElse(null);

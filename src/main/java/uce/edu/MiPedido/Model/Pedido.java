@@ -29,6 +29,15 @@ public class Pedido {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<DetallePedido> detalles;
 
+    //Relacionar pedido con mesa
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "id_mesa", nullable = true)
+    private Mesa mesa;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoPedido tipoPedido;
+
     public Pedido() {
         this.fecha = LocalDateTime.now();
         this.total = 0;
@@ -86,6 +95,22 @@ public class Pedido {
     public void prePersist() {
         this.estado = EstadoPedido.ABIERTO;
         this.fecha = LocalDateTime.now();
+    }
+
+    public Mesa getMesa() {
+        return mesa;
+    }
+
+    public void setMesa(Mesa mesa) {
+        this.mesa = mesa;
+    }
+
+    public TipoPedido getTipoPedido() {
+        return tipoPedido;
+    }
+
+    public void setTipoPedido(TipoPedido tipoPedido) {
+        this.tipoPedido = tipoPedido;
     }
 
 }
