@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uce.edu.MiPedido.Model.Pedido;
+import uce.edu.MiPedido.Model.Rol;
+import uce.edu.MiPedido.Model.Usuario;
 import uce.edu.MiPedido.Repository.PedidoRepository;
 import uce.edu.MiPedido.Service.MesaService;
 import uce.edu.MiPedido.Service.PedidoService;
 import uce.edu.MiPedido.Service.ProductoService;
+import uce.edu.MiPedido.Service.UsuarioService;
+import uce.edu.MiPedido.Service.UsuarioSesionService;
 
 @Controller
 public class PedidoController {
@@ -30,9 +34,16 @@ public class PedidoController {
     @Autowired
     private MesaService mesaService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private UsuarioSesionService usuarioSesionService;
+
     //Menú de pedidos
     @GetMapping("/pedidos")
-    public String menuPedidos() {
+    public String menuPedidos(Model model) {
+        model.addAttribute("usuario", usuarioSesionService.getUsuarioActual());
         return "pedidos";
     }
 
@@ -155,6 +166,17 @@ public class PedidoController {
             redirect.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/pedidos/" + id;
+    }
+
+    @ModelAttribute("usuarioActivo")
+    public Usuario usuarioActivoSimulado() {
+
+        Usuario usuario = new Usuario();
+        usuario.setUsername("admin");     // o "mesero1"
+        usuario.setRol(Rol.MESERO);        // cambia a Rol.MESERO para probar
+        usuario.setActivo(true);
+
+        return usuario;
     }
 
 }

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Gestión de Mesas</title>
+
+        <!-- Bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+              rel="stylesheet">
+    </head>
+
+    <body class="bg-light">
+
+        <div class="container mt-4">
+
+            <!-- TÍTULO -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">Gestión de Mesas</h2>
+                    <p class="text-muted mb-0">
+                        Administración de mesas del restaurante
+                    </p>
+                </div>
+            </div>
+
+            <!-- MENSAJE DE ERROR -->
+            <div th:if="${error}" class="alert alert-danger">
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- CARD: CREAR MESA -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    Crear nueva mesa
+                </div>
+
+                <div class="card-body">
+                    <form th:action="@{/mesas/crear}" method="post" class="row g-3">
+
+                        <!-- Número de mesa -->
+                        <div class="col-md-4">
+                            <label class="form-label">Número de mesa</label>
+                            <input type="number"
+                                   name="numero"
+                                   class="form-control"
+                                   placeholder="Ej: 1"
+                                   min="1"
+                                   required>
+                        </div>
+
+                        <!-- Botón -->
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-success w-100">
+                                Crear mesa
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- CARD: LISTADO DE MESAS -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    Mesas registradas
+                </div>
+
+                <div class="card-body p-0">
+                    <table class="table table-striped table-hover mb-0">
+
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>ID</th>
+                                <th>Número</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr th:each="mesa : ${mesas}">
+                                <td th:text="${mesa.idMesa}"></td>
+
+                                <td>
+                                    <span class="fw-bold"
+                                          th:text="'Mesa ' + ${mesa.numero}">
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge"
+                                          th:text="${mesa.estado}"
+                                          th:classappend="
+                                          ${mesa.estado.name() == 'LIBRE'} ? 'bg-success' : 'bg-danger'">
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- SIN MESAS -->
+                            <tr th:if="${mesas.isEmpty()}">
+                                <td colspan="3" class="text-center text-muted">
+                                    No hay mesas registradas
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+
+            <!-- BOTONES -->
+            <div class="mt-4">
+                <a href="/pedidos" class="btn btn-secondary">
+                    Volver al sistema
+                </a>
+            </div>
+
+        </div>
+
+    </body>
+</html>

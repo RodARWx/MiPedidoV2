@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <title>Detalle del Pedido</title>
 
-        <!-- Bootstrap CSS -->
+        <!-- Bootstrap -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
               rel="stylesheet">
     </head>
@@ -21,34 +21,32 @@
                 <span th:text="${error}"></span>
             </div>
 
-            <!-- INFORMACIÓN GENERAL DEL PEDIDO -->
+            <!-- INFO DEL PEDIDO -->
             <div class="card mb-4">
                 <div class="card-body">
 
-                    <!-- Cliente -->
                     <p>
                         <strong>Cliente:</strong>
                         <span th:text="${pedido.cliente}"></span>
                     </p>
 
-
-                    <!-- Mesa SOLO si es pedido en mesa -->
-                    <p th:if="${pedido.tipoPedido != null && pedido.tipoPedido.name() == 'MESA'}">
+                    <!-- MESA -->
+                    <p th:if="${pedido.mesa != null}">
                         <strong>Mesa:</strong>
                         <span class="badge bg-secondary"
                               th:text="'Mesa ' + ${pedido.mesa.numero}">
                         </span>
                     </p>
 
-                    <!-- Para llevar -->
-                    <p th:if="${pedido.tipoPedido != null && pedido.tipoPedido.name() == 'PARA_LLEVAR'}">
+                    <!-- PARA LLEVAR -->
+                    <p th:if="${pedido.mesa == null}">
                         <strong>Pedido:</strong>
                         <span class="badge bg-dark">
                             Para llevar
                         </span>
                     </p>
 
-                    <!-- Estado del pedido -->
+                    <!-- ESTADO -->
                     <p>
                         <strong>Estado:</strong>
                         <span class="badge"
@@ -64,9 +62,10 @@
                 </div>
             </div>
 
-            <!-- AGREGAR PRODUCTO (SOLO SI ABIERTO O CONFIRMADO) -->
+            <!-- AGREGAR PRODUCTO (solo si editable) -->
             <div class="card mb-4"
-                 th:if="${pedido.estado.name() == 'ABIERTO' || pedido.estado.name() == 'CONFIRMADO'}">
+                 th:if="${pedido.estado.name() != 'PAGADO'
+                 && pedido.estado.name() != 'CANCELADO'}">
 
                 <div class="card-header">
                     Agregar producto
@@ -78,7 +77,6 @@
                         <input type="hidden" name="idPedido"
                                th:value="${pedido.idPedido}"/>
 
-                        <!-- Producto -->
                         <div class="col-md-6">
                             <label class="form-label">Producto</label>
                             <select name="idProducto" class="form-select" required>
@@ -90,18 +88,13 @@
                             </select>
                         </div>
 
-                        <!-- Cantidad -->
                         <div class="col-md-3">
                             <label class="form-label">Cantidad</label>
-                            <input type="number"
-                                   name="cantidad"
-                                   min="1"
-                                   value="1"
-                                   class="form-control"
-                                   required>
+                            <input type="number" name="cantidad"
+                                   min="1" value="1"
+                                   class="form-control" required>
                         </div>
 
-                        <!-- Botón -->
                         <div class="col-md-3 d-flex align-items-end">
                             <button type="submit" class="btn btn-success w-100">
                                 Agregar
@@ -120,33 +113,32 @@
 
                 <div class="card-body p-0">
                     <table class="table table-striped mb-0">
-
                         <thead class="table-dark">
                             <tr>
                                 <th>Producto</th>
                                 <th>Precio</th>
                                 <th>Cantidad</th>
                                 <th>Subtotal</th>
-                                <th th:if="${pedido.estado.name() == 'ABIERTO' || pedido.estado.name() == 'CONFIRMADO'}">
+                                <th th:if="${pedido.estado.name() != 'PAGADO'
+                                    && pedido.estado.name() != 'CANCELADO'}">
                                     Acción
                                 </th>
                             </tr>
                         </thead>
 
                         <tbody>
-
+                            <!-- PRODUCTOS -->
                             <tr th:each="detalle : ${pedido.detalles}">
                                 <td th:text="${detalle.producto.nombre}"></td>
                                 <td th:text="${detalle.producto.precio}"></td>
                                 <td th:text="${detalle.cantidad}"></td>
                                 <td th:text="${detalle.subtotal}"></td>
 
-                                <!-- Eliminar SOLO si editable -->
-                                <td th:if="${pedido.estado.name() == 'ABIERTO' || pedido.estado.name() == 'CONFIRMADO'}">
+                                <td th:if="${pedido.estado.name() != 'PAGADO'
+                                    && pedido.estado.name() != 'CANCELADO'}">
                                     <form th:action="@{/eliminar_detalle/{idDetalle}(idDetalle=${detalle.idDetalle})}"
                                           method="post">
-                                        <input type="hidden"
-                                               name="idPedido"
+                                        <input type="hidden" name="idPedido"
                                                th:value="${pedido.idPedido}">
                                         <button class="btn btn-danger btn-sm">
                                             Eliminar
@@ -155,7 +147,7 @@
                                 </td>
                             </tr>
 
-                            <!-- Sin productos -->
+                            <!-- SIN PRODUCTOS -->
                             <tr th:if="${pedido.detalles.isEmpty()}">
                                 <td colspan="5" class="text-center text-muted">
                                     No hay productos en este pedido
@@ -170,7 +162,7 @@
             <!-- TOTAL + ACCIONES -->
             <div class="d-flex justify-content-between align-items-center mb-4">
 
-                <!-- Total -->
+                <!-- TOTAL -->
                 <h4>
                     Total: $
                     <span th:text="${pedido.total}"></span>
@@ -178,16 +170,17 @@
 
                 <div class="d-flex gap-2">
 
-                    <a th:if="${pedido.estado.name() == 'ABIERTO' && !pedido.detalles.isEmpty()}"
+                    <!-- CONFIRMAR PEDIDO -->
+                    <a th:if="${pedido.estado.name() == 'ABIERTO'
+                       && !pedido.detalles.isEmpty()}"
                        th:href="@{/pedido/confirmar/{id}(id=${pedido.idPedido})}"
                        class="btn btn-warning">
                         Confirmar pedido
                     </a>
 
-
-
-                    <!-- PAGAR SOLO SI CONFIRMADO -->
-                    <form th:if="${pedido.estado.name() == 'CONFIRMADO' && !pedido.detalles.isEmpty()}"
+                    <!-- PAGAR PEDIDO -->
+                    <form th:if="${pedido.estado.name() == 'CONFIRMADO'
+                          && !pedido.detalles.isEmpty()}"
                           th:action="@{/pedidos/pagar/{id}(id=${pedido.idPedido})}"
                           method="post">
                         <button class="btn btn-danger">
@@ -195,11 +188,12 @@
                         </button>
                     </form>
 
-
-                    <!-- CANCELAR SOLO SI ABIERTO O CONFIRMADO -->
-                    <a th:if="${pedido.estado.name() == 'ABIERTO' || pedido.estado.name() == 'CONFIRMADO'}"
+                    <!-- CANCELAR PEDIDO (mesero SÍ puede) -->
+                    <a th:if="${pedido.estado.name() != 'PAGADO'
+                       && pedido.estado.name() != 'CANCELADO'}"
                        th:href="@{/pedido/cancelar/{id}(id=${pedido.idPedido})}"
-                       class="btn btn-outline-danger">
+                       class="btn btn-outline-danger"
+                       onclick="return confirm('¿Cancelar este pedido?')">
                         Cancelar pedido
                     </a>
 
