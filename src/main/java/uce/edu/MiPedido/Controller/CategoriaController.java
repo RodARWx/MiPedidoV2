@@ -17,7 +17,8 @@ public class CategoriaController {
     @GetMapping("/categorias")
     public String menuCategorias(Model model) {
         model.addAttribute("listaCategorias", categoriaService.listarTodas());
-        return "listar_categorias";
+        model.addAttribute("categoria", new Categoria());
+        return "categorias";
     }
 
     @GetMapping("/nueva_categoria")

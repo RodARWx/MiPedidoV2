@@ -66,6 +66,12 @@
                             Gestión de Mesas
                         </a>
 
+                        <a th:if="${usuarioActivo.rol.name() == 'ADMIN'}"
+                           th:href="@{/categorias}"
+                           class="list-group-item list-group-item-action text-danger fw-bold">
+                            Gestión de Categorías
+                        </a>
+
                     </div>
 
                 </div>

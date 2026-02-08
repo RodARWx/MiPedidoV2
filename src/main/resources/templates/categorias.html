@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Categorías</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+    <!-- TÍTULO PRINCIPAL -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Gestión de Categorías</h2>
+            <p class="text-muted mb-0">
+                Administración de categorías del menú
+            </p>
+        </div>
+    </div>
+
+    <!-- MENSAJE DE ERROR (opcional) -->
+    <div th:if="${error}" class="alert alert-danger">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- CARD: CREAR CATEGORÍA -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Crear nueva categoría
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/guardar_categoria}"
+                  th:object="${categoria}"
+                  method="post"
+                  class="row g-3">
+
+                <!-- Nombre -->
+                <div class="col-md-4">
+                    <label class="form-label">Nombre</label>
+                    <input type="text"
+                           th:field="*{nombre}"
+                           class="form-control"
+                           placeholder="Ej: Bebidas"
+                           required>
+                </div>
+
+                <!-- Descripción -->
+                <div class="col-md-5">
+                    <label class="form-label">Descripción</label>
+                    <input type="text"
+                           th:field="*{descripcion}"
+                           class="form-control"
+                           placeholder="Ej: Bebidas frías y calientes">
+                </div>
+
+                <!-- Botón -->
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-success w-100">
+                        Crear categoría
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- CARD: LISTADO DE CATEGORÍAS -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            Categorías registradas
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+
+                <thead class="table-secondary">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="c : ${listaCategorias}">
+                    <td th:text="${c.idCategoria}"></td>
+                    <td th:text="${c.nombre}"></td>
+                    <td th:text="${c.descripcion}"></td>
+
+                    <!-- Estado -->
+                    <td>
+                        <span class="badge"
+                              th:text="${c.activa ? 'Activa' : 'Inactiva'}"
+                              th:classappend="${c.activa} ? 'bg-success' : 'bg-secondary'">
+                        </span>
+                    </td>
+
+                    <!-- Acción -->
+                    <td>
+                        <a th:href="@{/categoria/cambiar_estado/{id}(id=${c.idCategoria})}"
+                           class="btn btn-warning btn-sm">
+                            Cambiar estado
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- SIN CATEGORÍAS -->
+                <tr th:if="${listaCategorias.isEmpty()}">
+                    <td colspan="5" class="text-center text-muted">
+                        No hay categorías registradas
+                    </td>
+                </tr>
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+    <!-- BOTONES INFERIORES -->
+    <div class="mt-4">
+        <a href="/pedidos" class="btn btn-secondary">
+            Volver al sistema
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>
