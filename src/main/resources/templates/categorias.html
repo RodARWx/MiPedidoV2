@@ -104,8 +104,15 @@
                         </span>
                     </td>
 
-                    <!-- Acción -->
+                    <!-- Acciones -->
                     <td>
+                        <!-- EDITAR -->
+                        <a th:href="@{/editar_categoria/{id}(id=${c.idCategoria})}"
+                           class="btn btn-primary btn-sm me-1">
+                            Editar
+                        </a>
+
+                        <!-- CAMBIAR ESTADO -->
                         <a th:href="@{/categoria/cambiar_estado/{id}(id=${c.idCategoria})}"
                            class="btn btn-warning btn-sm">
                             Cambiar estado

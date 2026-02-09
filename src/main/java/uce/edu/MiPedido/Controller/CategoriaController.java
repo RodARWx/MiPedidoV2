@@ -33,6 +33,19 @@ public class CategoriaController {
         return "redirect:/categorias";
     }
 
+    @GetMapping("/editar_categoria/{id}")
+    public String editarCategoria(@PathVariable Long id, Model model) {
+
+        Categoria categoria = categoriaService.buscarPorId(id);
+
+        if (categoria == null) {
+            return "redirect:/categorias";
+        }
+
+        model.addAttribute("categoria", categoria);
+        return "editar_categoria";
+    }
+
     @GetMapping("/categoria/cambiar_estado/{id}")
     public String cambiarEstado(@PathVariable Long id) {
         categoriaService.cambiarEstado(id);
