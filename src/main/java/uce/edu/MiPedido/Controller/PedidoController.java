@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uce.edu.MiPedido.Model.EstadoPedido;
 import uce.edu.MiPedido.Model.Pedido;
 import uce.edu.MiPedido.Model.Rol;
 import uce.edu.MiPedido.Model.Usuario;
@@ -47,10 +48,19 @@ public class PedidoController {
         return "pedidos";
     }
 
-    //Listar pedidos
     @GetMapping("/listar_pedidos")
-    public String listarPedidos(Model model) {
-        model.addAttribute("listaPedidos", pedidoRepository.findAll());
+    public String listarPedidos(
+            @RequestParam(required = false) java.util.List<EstadoPedido> estados,
+            Model model) {
+
+        if (estados == null || estados.isEmpty()) {
+            model.addAttribute("listaPedidos", pedidoService.buscarTodos());
+        } else {
+            model.addAttribute("listaPedidos", pedidoService.listarPorEstados(estados));
+        }
+
+        model.addAttribute("estadosSeleccionados", estados);
+
         return "listar_pedidos";
     }
 

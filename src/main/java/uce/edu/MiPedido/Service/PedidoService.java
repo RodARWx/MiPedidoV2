@@ -1,5 +1,6 @@
 package uce.edu.MiPedido.Service;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uce.edu.MiPedido.Model.DetallePedido;
@@ -28,6 +29,10 @@ public class PedidoService {
 
     @Autowired
     private MesaRepository mesaRepository;
+
+    public List<Pedido> listarPorEstados(List<EstadoPedido> estados) {
+        return pedidoRepository.findByEstadoIn(estados);
+    }
 
     // Calcula el subtotal de un detalle
     public double calcularSubtotal(Producto producto, int cantidad) {
@@ -243,6 +248,10 @@ public class PedidoService {
         }
 
         pedidoRepository.delete(pedido);
+    }
+
+    public List<Pedido> buscarTodos() {
+        return pedidoRepository.findAll();
     }
 
     public void cancelarPedido(Long idPedido) {
