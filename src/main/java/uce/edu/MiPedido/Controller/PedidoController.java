@@ -69,7 +69,9 @@ public class PedidoController {
     public String nuevoPedido(Model model) {
         model.addAttribute("pedido", new Pedido());
         model.addAttribute("mesasLibres", mesaService.listarLibres());
+        model.addAttribute("productos", productoService.listarDisponibles());
         return "nuevo_pedido";
+
     }
 
     //Guardar pedido
@@ -80,7 +82,15 @@ public class PedidoController {
     ) {
         try {
             Pedido nuevo = pedidoService.crearPedido(pedido);
+
+            // ✅ MENSAJE FLASH
+            redirect.addFlashAttribute(
+                    "success",
+                    "Pedido guardado con éxito"
+            );
+
             return "redirect:/pedidos/" + nuevo.getIdPedido();
+
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute("error", e.getMessage());
             return "redirect:/nuevo_pedido";
@@ -146,12 +156,11 @@ public class PedidoController {
         return "redirect:/pedidos/" + idPedido;
     }
 
-    @GetMapping("/pedido/confirmar/{id}")
-    public String confirmarPedido(@PathVariable Long id) {
-        pedidoService.confirmarPedido(id);
-        return "redirect:/pedidos/" + id;
-    }
-
+//    @GetMapping("/pedido/confirmar/{id}")
+//    public String confirmarPedido(@PathVariable Long id) {
+//        pedidoService.confirmarPedido(id);
+//        return "redirect:/pedidos/" + id;
+//    }
     @PostMapping("/pedidos/pagar/{id}")
     public String pagarPedido(
             @PathVariable Long id,

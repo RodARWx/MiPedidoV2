@@ -1,5 +1,6 @@
 package uce.edu.MiPedido.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class PedidoService {
     @Autowired
     private MesaRepository mesaRepository;
 
-    public List<Pedido> listarPorEstados(List<EstadoPedido> estados) {
+    public List<Pedido> listarPorEstados(List <EstadoPedido> estados) {
         return pedidoRepository.findByEstadoIn(estados);
     }
 
@@ -138,24 +139,103 @@ public class PedidoService {
         }
     }
 
-    public void confirmarPedido(Long idPedido) {
-        Pedido pedido = buscarPorId(idPedido);
+//    public void confirmarPedido(Long idPedido) {
+//        Pedido pedido = buscarPorId(idPedido);
+//
+//        if (pedido == null) {
+//            return;
+//        }
+//
+//        if (pedido.getEstado() != EstadoPedido.ABIERTO) {
+//            throw new IllegalStateException("Solo se puede confirmar un pedido abierto");
+//        }
+//
+//        if (pedido.getDetalles() == null || pedido.getDetalles().isEmpty()) {
+//            throw new IllegalStateException("No se puede confirmar un pedido sin productos");
+//        }
+//
+//        pedido.setEstado(EstadoPedido.CONFIRMADO);
+//        pedidoRepository.save(pedido);
+//    }
+    
+    public Pedido crearPedido(Pedido pedido) {
 
-        if (pedido == null) {
-            return;
-        }
-
-        if (pedido.getEstado() != EstadoPedido.ABIERTO) {
-            throw new IllegalStateException("Solo se puede confirmar un pedido abierto");
-        }
-
-        if (pedido.getDetalles() == null || pedido.getDetalles().isEmpty()) {
-            throw new IllegalStateException("No se puede confirmar un pedido sin productos");
-        }
-
-        pedido.setEstado(EstadoPedido.CONFIRMADO);
-        pedidoRepository.save(pedido);
+    // 1️⃣ Validar cliente
+    if (pedido.getCliente() == null || pedido.getCliente().isBlank()) {
+        throw new IllegalStateException("El pedido debe tener un cliente");
     }
+
+    // 2️⃣ Validar tipo de pedido
+    if (pedido.getTipoPedido() == null) {
+        throw new IllegalStateException("Debe seleccionar el tipo de pedido");
+    }
+
+    // 3️⃣ Validar mesa si aplica
+    if (pedido.getTipoPedido() == TipoPedido.MESA) {
+
+        if (pedido.getMesa() == null) {
+            throw new IllegalStateException("Debe seleccionar una mesa");
+        }
+
+        Mesa mesa = mesaRepository.findById(
+                pedido.getMesa().getIdMesa()
+        ).orElseThrow(() -> new IllegalStateException("Mesa no encontrada"));
+
+        if (mesa.getEstado() == EstadoMesa.OCUPADA) {
+            throw new IllegalStateException("La mesa ya está ocupada");
+        }
+
+        mesa.setEstado(EstadoMesa.OCUPADA);
+        mesaRepository.save(mesa);
+
+        pedido.setMesa(mesa);
+    } else {
+        pedido.setMesa(null);
+    }
+
+    // 4️⃣ Validar productos
+    if (pedido.getDetalles() == null || pedido.getDetalles().isEmpty()) {
+        throw new IllegalStateException("El pedido debe tener al menos un producto");
+    }
+
+    // 5️⃣ Validar cantidades y calcular subtotales
+    double total = 0;
+
+    for (DetallePedido d : pedido.getDetalles()) {
+
+        if (d.getCantidad() <= 0) {
+            throw new IllegalStateException("Cantidad inválida");
+        }
+
+        Producto producto = productoRepository
+                .findById(d.getProducto().getIdProducto())
+                .orElseThrow(() -> new IllegalStateException("Producto no válido"));
+
+        d.setProducto(producto);
+        d.setPedido(pedido);
+
+        double subtotal = producto.getPrecio() * d.getCantidad();
+        d.setSubtotal(subtotal);
+
+        total += subtotal;
+    }
+
+    // 6️⃣ Estado inicial correcto
+    pedido.setEstado(EstadoPedido.CONFIRMADO);
+    pedido.setFecha(LocalDateTime.now());
+    pedido.setTotal(total);
+
+    // 7️⃣ Guardar pedido
+    Pedido guardado = pedidoRepository.save(pedido);
+
+    // 8️⃣ Guardar detalles
+    for (DetallePedido d : pedido.getDetalles()) {
+        detallePedidoRepository.save(d);
+    }
+
+    return guardado;
+}
+
 
     public void pagarPedido(Long idPedido) {
 
@@ -195,32 +275,32 @@ public class PedidoService {
         return pedidoRepository.save(pedido);
     }
 
-    public Pedido crearPedido(Pedido pedido) {
-
-        validarPedido(pedido);
-
-        pedido.setEstado(EstadoPedido.ABIERTO);
-        pedido.setTotal(0);
-
-        // SOLO bloquear mesa si es pedido en mesa
-        if (pedido.getTipoPedido() == TipoPedido.MESA) {
-
-            Mesa mesa = mesaRepository
-                    .findById(pedido.getMesa().getIdMesa())
-                    .orElseThrow(() -> new IllegalStateException("Mesa no encontrada"));
-
-            if (mesa.getEstado() == EstadoMesa.OCUPADA) {
-                throw new IllegalStateException("La mesa ya está ocupada");
-            }
-
-            mesa.setEstado(EstadoMesa.OCUPADA);
-            mesaRepository.save(mesa);
-
-            pedido.setMesa(mesa);
-        }
-
-        return pedidoRepository.save(pedido);
-    }
+//    public Pedido crearPedido(Pedido pedido) {
+//
+//        validarPedido(pedido);
+//
+//        pedido.setEstado(EstadoPedido.ABIERTO);
+//        pedido.setTotal(0);
+//
+//        // SOLO bloquear mesa si es pedido en mesa
+//        if (pedido.getTipoPedido() == TipoPedido.MESA) {
+//
+//            Mesa mesa = mesaRepository
+//                    .findById(pedido.getMesa().getIdMesa())
+//                    .orElseThrow(() -> new IllegalStateException("Mesa no encontrada"));
+//
+//            if (mesa.getEstado() == EstadoMesa.OCUPADA) {
+//                throw new IllegalStateException("La mesa ya está ocupada");
+//            }
+//
+//            mesa.setEstado(EstadoMesa.OCUPADA);
+//            mesaRepository.save(mesa);
+//
+//            pedido.setMesa(mesa);
+//        }
+//
+//        return pedidoRepository.save(pedido);
+//    }
 
     private void validarPedido(Pedido pedido) {
 

@@ -16,6 +16,12 @@
             <!-- TÍTULO -->
             <h2 class="mb-4">Detalle del Pedido</h2>
 
+            <div th:if="${success}"
+                 class="alert alert-success text-center"
+                 id="successMessage">
+                <span th:text="${success}"></span>
+            </div>
+
             <!-- MENSAJE DE ERROR -->
             <div th:if="${error}" class="alert alert-danger">
                 <span th:text="${error}"></span>
@@ -176,6 +182,13 @@
                        th:href="@{/pedido/confirmar/{id}(id=${pedido.idPedido})}"
                        class="btn btn-warning">
                         Confirmar pedido
+                    </a>
+
+                    <!-- NUEVO PEDIDO (para mesero) -->
+                    <a th:if="${pedido.estado.name() == 'CONFIRMADO'}"
+                       href="/nuevo_pedido"
+                       class="btn btn-success">
+                        Nuevo pedido
                     </a>
 
                     <!-- PAGAR PEDIDO -->

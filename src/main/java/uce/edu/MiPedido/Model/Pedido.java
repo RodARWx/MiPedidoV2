@@ -91,11 +91,11 @@ public class Pedido {
         this.estado = estado;
     }
 
-    @PrePersist
-    public void prePersist() {
-        this.estado = EstadoPedido.ABIERTO;
-        this.fecha = LocalDateTime.now();
-    }
+//    @PrePersist
+//    public void prePersist() {
+//        this.estado = EstadoPedido.ABIERTO;
+//        this.fecha = LocalDateTime.now();
+//    }
 
     public Mesa getMesa() {
         return mesa;
