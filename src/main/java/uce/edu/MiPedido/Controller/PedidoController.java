@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uce.edu.MiPedido.Model.Caja;
 import uce.edu.MiPedido.Model.EstadoPedido;
 import uce.edu.MiPedido.Model.Pedido;
 import uce.edu.MiPedido.Model.Rol;
 import uce.edu.MiPedido.Model.Usuario;
 import uce.edu.MiPedido.Repository.PedidoRepository;
+import uce.edu.MiPedido.Service.CajaService;
+import uce.edu.MiPedido.Service.CategoriaService;
 import uce.edu.MiPedido.Service.MesaService;
 import uce.edu.MiPedido.Service.PedidoService;
 import uce.edu.MiPedido.Service.ProductoService;
@@ -41,6 +44,12 @@ public class PedidoController {
     @Autowired
     private UsuarioSesionService usuarioSesionService;
 
+    @Autowired
+    private CajaService cajaService; // Inyectar CajaService
+    
+    @Autowired
+    private CategoriaService categoriaService; // <--- AGREGA ESTA LÍNEA
+
     //Menú de pedidos
     @GetMapping("/pedidos")
     public String menuPedidos(Model model) {
@@ -66,12 +75,19 @@ public class PedidoController {
 
     //Nuevo pedido
     @GetMapping("/nuevo_pedido")
-    public String nuevoPedido(Model model) {
+    public String nuevoPedido(@RequestParam(required = false) Long idCategoria, Model model) {
         model.addAttribute("pedido", new Pedido());
         model.addAttribute("mesasLibres", mesaService.listarLibres());
-        model.addAttribute("productos", productoService.listarDisponibles());
-        return "nuevo_pedido";
+        model.addAttribute("categorias", categoriaService.listarActivas());
 
+        if (idCategoria != null) {
+            // Filtrar si hay categoría seleccionada
+            model.addAttribute("productos", productoService.listarPorCategoria(categoriaService.buscarPorId(idCategoria)));
+            model.addAttribute("categoriaSeleccionada", idCategoria);
+        } else {
+            model.addAttribute("productos", productoService.listarDisponibles());
+        }
+        return "nuevo_pedido";
     }
 
     //Guardar pedido
@@ -162,13 +178,21 @@ public class PedidoController {
 //        return "redirect:/pedidos/" + id;
 //    }
     @PostMapping("/pedidos/pagar/{id}")
-    public String pagarPedido(
-            @PathVariable Long id,
-            RedirectAttributes redirect
-    ) {
+    public String pagarPedido(@PathVariable Long id,
+            @RequestParam String metodoPago, // Efectivo/Transferencia
+            RedirectAttributes redirect) {
         try {
-            pedidoService.pagarPedido(id);
-        } catch (IllegalStateException e) {
+            // Validar que hay caja abierta
+            Caja caja = cajaService.obtenerCajaAbierta();
+            if (caja == null) {
+                throw new IllegalStateException("NO SE PUEDE COBRAR: La caja está cerrada.");
+            }
+
+            pedidoService.pagarPedido(id, metodoPago); // Necesitas actualizar Service para aceptar metodoPago
+            cajaService.registrarIngreso(pedidoService.buscarPorId(id).getTotal()); // Sumar a caja
+
+            redirect.addFlashAttribute("success", "Pedido pagado y registrado en caja.");
+        } catch (Exception e) {
             redirect.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/pedidos/" + id;

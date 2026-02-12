@@ -38,6 +38,9 @@ public class Pedido {
     @Column(nullable = false)
     private TipoPedido tipoPedido;
 
+    @Column(length = 20)
+    private String metodoPago;
+
     public Pedido() {
         this.fecha = LocalDateTime.now();
         this.total = 0;
@@ -96,7 +99,6 @@ public class Pedido {
 //        this.estado = EstadoPedido.ABIERTO;
 //        this.fecha = LocalDateTime.now();
 //    }
-
     public Mesa getMesa() {
         return mesa;
     }
@@ -111,6 +113,14 @@ public class Pedido {
 
     public void setTipoPedido(TipoPedido tipoPedido) {
         this.tipoPedido = tipoPedido;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
     }
 
 }

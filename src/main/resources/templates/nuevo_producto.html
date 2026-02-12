@@ -1,76 +1,74 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
-    <head>
-        <meta charset="ISO-8859-1">
-        <title>Nuevo Producto</title>
-
-        <link rel="stylesheet"
-              href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-              crossorigin="anonymous">
-    </head>
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments :: headerfiles}"><title>Nuevo Producto</title></head>
     <body>
-        <div class="container">
 
-            <h1 class="mt-4">Nuevo Producto</h1>
-            <hr>
+        <div th:replace="~{fragments :: sidebar}"></div>
 
-            <form th:action="@{/guardar_producto}"
-                  th:object="${producto}"
-                  method="POST">
-
-                <!-- NOMBRE -->
-                <input type="text"
-                       th:field="*{nombre}"
-                       placeholder="Nombre del producto"
-                       class="form-control mb-3 col-4"
-                       required>
-
-                <!-- PRECIO -->
-                <input type="number"
-                       step="0.01"
-                       th:field="*{precio}"
-                       placeholder="Precio"
-                       class="form-control mb-3 col-2"
-                       required>
-
-                <!-- CATEGORÍA -->
-                <select th:field="*{categoria}"
-                        class="form-control mb-3 col-4"
-                        required>
-
-                    <option value="">Seleccione categoría</option>
-
-                    <option th:each="cat : ${categorias}"
-                            th:value="${cat.idCategoria}"
-                            th:text="${cat.nombre}">
-                    </option>
-
-                </select>
-
-                <!-- DISPONIBLE -->
-                <div class="form-check mb-3">
-                    <input class="form-check-input"
-                           type="checkbox"
-                           th:field="*{disponible}">
-                    <label class="form-check-label">
-                        Disponible
-                    </label>
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">Nuevo Producto</h2>
+                    <p class="text-muted small mb-0">Registra un nuevo item en el menú.</p>
                 </div>
+                <a href="/listar_productos" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-2"></i> Volver
+                </a>
+            </div>
 
-                <button type="submit" class="btn btn-info">
-                    Guardar Producto
-                </button>
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-plus-circle me-2"></i> Datos del Producto</h5>
+                        </div>
 
-            </form>
+                        <div class="card-body p-4">
+                            <form th:action="@{/guardar_producto}" th:object="${producto}" method="POST" enctype="multipart/form-data">
 
-            <hr>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small fw-bold text-uppercase">Nombre</label>
+                                    <input type="text" th:field="*{nombre}" class="form-control form-control-lg" placeholder="Ej: Hamburguesa Especial" required>
+                                </div>
 
-            <a th:href="@{/listar_productos}">
-                Volver al listado
-            </a>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold text-uppercase">Precio</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" step="0.01" th:field="*{precio}" class="form-control" placeholder="0.00" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted small fw-bold text-uppercase">Categoría</label>
+                                        <select th:field="*{categoria}" class="form-select" required>
+                                            <option value="">Seleccione...</option>
+                                            <option th:each="cat : ${categorias}" th:value="${cat.idCategoria}" th:text="${cat.nombre}"></option>
+                                        </select>
+                                    </div>
+                                </div>
 
+                                <div class="mb-4">
+                                    <label class="form-label text-muted small fw-bold text-uppercase">Imagen (Opcional)</label>
+                                    <input type="file" name="file" class="form-control" accept="image/*">
+                                    <div class="form-text small">Se recomienda formato JPG o PNG cuadrado.</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="form-check form-switch p-3 bg-light rounded border">
+                                        <input class="form-check-input ms-0 me-3" type="checkbox" th:field="*{disponible}" checked>
+                                        <label class="form-check-label fw-bold ms-2">Disponible para venta</label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-2"></i> GUARDAR PRODUCTO
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 </html>

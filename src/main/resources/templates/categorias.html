@@ -1,146 +1,117 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Gestión de Categorías</title>
+    <head th:replace="fragments :: headerfiles"><title>Gestión de Categorías</title></head>
+    <body>
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-</head>
+        <div th:replace="fragments :: sidebar"></div>
 
-<body class="bg-light">
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">Gestión de Categorías</h2>
+                    <p class="text-muted small mb-0">Administra las secciones de tu menú digital.</p>
+                </div>
 
-<div class="container mt-4">
+                <div th:if="${error}" class="alert alert-danger shadow-sm border-0 py-2 px-3 mb-0 d-flex align-items-center">
+                    <i class="fas fa-exclamation-circle me-2"></i> <span th:text="${error}"></span>
+                </div>
+            </div>
 
-    <!-- TÍTULO PRINCIPAL -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1">Gestión de Categorías</h2>
-            <p class="text-muted mb-0">
-                Administración de categorías del menú
-            </p>
-        </div>
-    </div>
+            <div class="row g-4">
 
-    <!-- MENSAJE DE ERROR (opcional) -->
-    <div th:if="${error}" class="alert alert-danger">
-        <span th:text="${error}"></span>
-    </div>
-
-    <!-- CARD: CREAR CATEGORÍA -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            Crear nueva categoría
-        </div>
-
-        <div class="card-body">
-            <form th:action="@{/guardar_categoria}"
-                  th:object="${categoria}"
-                  method="post"
-                  class="row g-3">
-
-                <!-- Nombre -->
                 <div class="col-md-4">
-                    <label class="form-label">Nombre</label>
-                    <input type="text"
-                           th:field="*{nombre}"
-                           class="form-control"
-                           placeholder="Ej: Bebidas"
-                           required>
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white pt-4 pb-0 border-0">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                                    <i class="fas fa-folder-plus fa-lg"></i>
+                                </div>
+                                <h5 class="fw-bold mb-0">Nueva Categoría</h5>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/guardar_categoria}" th:object="${categoria}" method="post">
+
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small fw-bold text-uppercase">Nombre</label>
+                                    <input type="text" th:field="*{nombre}" class="form-control" placeholder="Ej: Bebidas Calientes" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label text-muted small fw-bold text-uppercase">Descripción</label>
+                                    <textarea th:field="*{descripcion}" class="form-control" rows="4" placeholder="Breve descripción para el menú..."></textarea>
+                                </div>
+
+                                <button class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-2"></i> GUARDAR CATEGORÍA
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Descripción -->
-                <div class="col-md-5">
-                    <label class="form-label">Descripción</label>
-                    <input type="text"
-                           th:field="*{descripcion}"
-                           class="form-control"
-                           placeholder="Ej: Bebidas frías y calientes">
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h6 class="fw-bold text-secondary mb-0 text-uppercase">Listado de Categorías</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4">ID</th>
+                                            <th>Nombre</th>
+                                            <th>Descripción</th>
+                                            <th>Estado</th>
+                                            <th class="text-end pe-4">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="c : ${listaCategorias}">
+                                            <td class="ps-4 text-muted fw-bold" th:text="'#' + ${c.idCategoria}"></td>
+                                            <td>
+                                                <span class="fw-bold text-dark" th:text="${c.nombre}"></span>
+                                            </td>
+                                            <td class="text-muted small text-truncate" style="max-width: 150px;" th:text="${c.descripcion}"></td>
+                                            <td>
+                                                <span class="badge rounded-pill" 
+                                                      th:classappend="${c.activa} ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'">
+                                                    <i class="fas fa-circle me-1 small" style="font-size: 8px;"></i>
+                                                    <span th:text="${c.activa ? 'Activa' : 'Inactiva'}"></span>
+                                                </span>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="btn-group">
+                                                    <a th:href="@{/editar_categoria/{id}(id=${c.idCategoria})}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                        <i class="fas fa-pen"></i>
+                                                    </a>
+                                                    <a th:href="@{/categoria/cambiar_estado/{id}(id=${c.idCategoria})}" 
+                                                       class="btn btn-sm btn-outline-secondary" 
+                                                       title="Activar/Desactivar"
+                                                       th:classappend="${c.activa} ? 'text-danger border-danger' : 'text-success border-success'">
+                                                        <i class="fas" th:classappend="${c.activa} ? 'fa-ban' : 'fa-check'"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${listaCategorias.isEmpty()}">
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="text-muted opacity-50 mb-2">
+                                                    <i class="fas fa-folder-open fa-3x"></i>
+                                                </div>
+                                                <p class="mb-0 text-muted">No hay categorías registradas aún.</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Botón -->
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-success w-100">
-                        Crear categoría
-                    </button>
-                </div>
-
-            </form>
-        </div>
-    </div>
-
-    <!-- CARD: LISTADO DE CATEGORÍAS -->
-    <div class="card">
-        <div class="card-header bg-dark text-white">
-            Categorías registradas
+            </div>
         </div>
 
-        <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0">
-
-                <thead class="table-secondary">
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-                </thead>
-
-                <tbody>
-
-                <tr th:each="c : ${listaCategorias}">
-                    <td th:text="${c.idCategoria}"></td>
-                    <td th:text="${c.nombre}"></td>
-                    <td th:text="${c.descripcion}"></td>
-
-                    <!-- Estado -->
-                    <td>
-                        <span class="badge"
-                              th:text="${c.activa ? 'Activa' : 'Inactiva'}"
-                              th:classappend="${c.activa} ? 'bg-success' : 'bg-secondary'">
-                        </span>
-                    </td>
-
-                    <!-- Acciones -->
-                    <td>
-                        <!-- EDITAR -->
-                        <a th:href="@{/editar_categoria/{id}(id=${c.idCategoria})}"
-                           class="btn btn-primary btn-sm me-1">
-                            Editar
-                        </a>
-
-                        <!-- CAMBIAR ESTADO -->
-                        <a th:href="@{/categoria/cambiar_estado/{id}(id=${c.idCategoria})}"
-                           class="btn btn-warning btn-sm">
-                            Cambiar estado
-                        </a>
-                    </td>
-                </tr>
-
-                <!-- SIN CATEGORÍAS -->
-                <tr th:if="${listaCategorias.isEmpty()}">
-                    <td colspan="5" class="text-center text-muted">
-                        No hay categorías registradas
-                    </td>
-                </tr>
-
-                </tbody>
-
-            </table>
-        </div>
-    </div>
-
-    <!-- BOTONES INFERIORES -->
-    <div class="mt-4">
-        <a href="/pedidos" class="btn btn-secondary">
-            Volver al sistema
-        </a>
-    </div>
-
-</div>
-
-</body>
+    </body>
 </html>

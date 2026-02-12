@@ -1,88 +1,82 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments :: headerfiles}"><title>Listado Productos</title></head>
+    <body>
 
-<head>
-    <meta charset="ISO-8859-1">
-    <title>Listado de Productos</title>
+        <div th:replace="~{fragments :: sidebar}"></div>
 
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          crossorigin="anonymous">
-</head>
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">Inventario</h2>
+                <a href="/nuevo_producto" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i> Nuevo</a>
+            </div>
 
-<body>
-<div class="container">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">ID</th>
+                                    <th>Imagen</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Precio</th>
+                                    <th>Estado</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="p : ${listaProductos}">
+                                    <td class="ps-4 text-muted fw-bold" th:text="${p.idProducto}"></td>
 
-    <h1 class="mt-4">Listado de Productos</h1>
-    <hr>
+                                    <td>
+                                        <div th:if="${p.imagenBase64 != null}" class="rounded border" 
+                                             style="width: 50px; height: 50px; overflow: hidden;">
+                                            <img th:src="@{'data:image/jpeg;base64,'+${p.imagenBase64}}" 
+                                                 style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                        <div th:if="${p.imagenBase64 == null}" 
+                                             class="rounded border bg-light d-flex align-items-center justify-content-center text-muted"
+                                             style="width: 50px; height: 50px;">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                    </td>
 
-    <table class="table table-bordered table-striped">
+                                    <td class="fw-bold text-dark" th:text="${p.nombre}"></td>
 
-        <thead class="thead-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
+                                    <td>
+                                        <span class="badge bg-light text-dark border" 
+                                              th:text="${p.categoria != null ? p.categoria.nombre : 'Sin Cat.'}"></span>
+                                    </td>
 
-        <tbody>
-        <tr th:each="producto : ${listaProductos}">
+                                    <td class="text-primary fw-bold" th:text="'$' + ${p.precio}"></td>
 
-            <td th:text="${producto.idProducto}"></td>
-            <td th:text="${producto.nombre}"></td>
+                                    <td>
+                                        <span class="badge rounded-pill"
+                                              th:classappend="${p.disponible} ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">
+                                            <i class="fas" th:classappend="${p.disponible} ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                                            <span th:text="${p.disponible ? 'Activo' : 'Inactivo'}"></span>
+                                        </span>
+                                    </td>
 
-            <!-- CATEGORÍA (DEFENSIVO) -->
-            <td th:text="${producto.categoria != null ? producto.categoria.nombre : 'Sin categoría'}"></td>
-
-            <td th:text="${producto.precio}"></td>
-
-            <!-- DISPONIBILIDAD -->
-            <td>
-                <span th:if="${producto.disponible}"
-                      class="badge badge-success">
-                    Disponible
-                </span>
-
-                <span th:if="${!producto.disponible}"
-                      class="badge badge-danger">
-                    No disponible
-                </span>
-            </td>
-
-            <!-- ACCIONES -->
-            <td>
-
-                <!-- EDITAR -->
-                <a th:href="@{/editar_producto/{id}(id=${producto.idProducto})}"
-                   class="btn btn-info btn-sm mb-1">
-                    Editar
-                </a>
-
-                <!-- CAMBIAR DISPONIBILIDAD -->
-                <a th:href="@{/producto/cambiar_disponibilidad/{id}(id=${producto.idProducto})}"
-                   class="btn btn-warning btn-sm mb-1">
-                    Cambiar estado
-                </a>
-
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <hr>
-
-    <a th:href="@{/nuevo_producto}" class="btn btn-primary">
-        Nuevo Producto
-    </a>
-
-    <a th:href="@{/productos}" class="btn btn-secondary">
-        Volver al menú Productos
-    </a>
-
-</div>
-</body>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a th:href="@{/editar_producto/{id}(id=${p.idProducto})}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                            <a th:href="@{/producto/cambiar_disponibilidad/{id}(id=${p.idProducto})}" 
+                                               class="btn btn-sm btn-outline-warning" title="Cambiar Estado">
+                                                <i class="fas fa-power-off"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

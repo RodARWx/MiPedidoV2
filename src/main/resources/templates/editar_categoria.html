@@ -1,51 +1,77 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="fragments :: headerfiles">
+        <title>Editar Categoría</title>
+    </head>
+    <body>
 
-<head>
-    <meta charset="ISO-8859-1">
-    <title>Editar Categoría</title>
+        <div th:replace="fragments :: sidebar"></div>
 
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          crossorigin="anonymous">
-</head>
+        <div class="main-content">
 
-<body>
-<div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">Editar Categoría</h2>
+                    <p class="text-muted small mb-0">Modifica la información de la categoría seleccionada.</p>
+                </div>
+                <a href="/categorias" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Volver al listado
+                </a>
+            </div>
 
-    <h1 class="mt-4">Editar Categoría</h1>
-    <hr>
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="fas fa-edit me-2"></i> Datos de la Categoría
+                            </h5>
+                        </div>
 
-    <form th:action="@{/guardar_categoria}"
-          th:object="${categoria}"
-          method="POST">
+                        <div class="card-body p-4">
+                            <form th:action="@{/guardar_categoria}" th:object="${categoria}" method="POST">
 
-        <!-- ID oculto (clave para que JPA haga UPDATE) -->
-        <input type="hidden"
-               th:field="*{idCategoria}">
+                                <input type="hidden" th:field="*{idCategoria}">
 
-        <input type="text"
-               th:field="*{nombre}"
-               placeholder="Nombre de la categoría"
-               class="form-control mb-3 col-4"
-               required>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small fw-bold text-uppercase">Nombre de Categoría</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-secondary"><i class="fas fa-tag"></i></span>
+                                        <input type="text" 
+                                               th:field="*{nombre}" 
+                                               class="form-control form-control-lg" 
+                                               placeholder="Ej: Bebidas" 
+                                               required>
+                                    </div>
+                                </div>
 
-        <input type="text"
-               th:field="*{descripcion}"
-               placeholder="Descripción"
-               class="form-control mb-3 col-6">
+                                <div class="mb-4">
+                                    <label class="form-label text-muted small fw-bold text-uppercase">Descripción</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-secondary"><i class="fas fa-align-left"></i></span>
+                                        <textarea th:field="*{descripcion}" 
+                                                  class="form-control" 
+                                                  rows="3" 
+                                                  placeholder="Detalles opcionales..."></textarea>
+                                    </div>
+                                </div>
 
-        <button type="submit" class="btn btn-info">
-            Guardar cambios
-        </button>
-    </form>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                                        <i class="fas fa-save me-2"></i> GUARDAR CAMBIOS
+                                    </button>
+                                    <a href="/categorias" class="btn btn-light text-muted fw-bold">
+                                        CANCELAR
+                                    </a>
+                                </div>
 
-    <hr>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <a th:href="@{/categorias}">
-        Volver a categorías
-    </a>
+        </div>
 
-</div>
-</body>
+    </body>
 </html>

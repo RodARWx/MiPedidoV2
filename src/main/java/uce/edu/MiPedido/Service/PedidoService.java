@@ -237,7 +237,7 @@ public class PedidoService {
 }
 
 
-    public void pagarPedido(Long idPedido) {
+    public void pagarPedido(Long idPedido, String metodoPago) { // <--- Ahora recibe el String
 
         Pedido pedido = buscarPorId(idPedido);
 
@@ -253,6 +253,9 @@ public class PedidoService {
             throw new IllegalStateException("No se puede pagar un pedido sin productos");
         }
 
+        // AQUÍ GUARDAMOS EL MÉTODO DE PAGO
+        pedido.setMetodoPago(metodoPago); 
+        
         pedido.setEstado(EstadoPedido.PAGADO);
 
         // Liberar mesa si existe

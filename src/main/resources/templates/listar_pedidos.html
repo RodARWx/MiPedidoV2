@@ -1,160 +1,75 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Listado de Pedidos</title>
+    <head th:replace="fragments :: headerfiles"><title>Historial</title></head>
+    <body>
 
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-</head>
+        <div th:replace="fragments :: sidebar"></div>
 
-<body class="bg-light">
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Historial de Pedidos</h2>
+                <a href="/nuevo_pedido" class="btn btn-primary"><i class="fas fa-plus me-2"></i> Nuevo</a>
+            </div>
 
-<div class="container mt-4">
-
-    <!-- Título -->
-    <h2 class="mb-4">Listado de Pedidos</h2>
-    
-    <!-- FILTRO POR ESTADO -->
-<form method="get" th:action="@{/listar_pedidos}" class="mb-4">
-    <div class="card">
-        <div class="card-header bg-light">
-            <strong>Filtrar por estado</strong>
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <form method="get" th:action="@{/listar_pedidos}" class="d-flex gap-3 align-items-center">
+                        <span class="fw-bold text-muted text-uppercase small">Filtrar:</span>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" name="estados" value="CONFIRMADO" th:checked="${estadosSeleccionados != null and estadosSeleccionados.contains('CONFIRMADO')}">
+                            <label class="form-check-label">Pendientes</label>
+                        </div>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" name="estados" value="PAGADO" th:checked="${estadosSeleccionados != null and estadosSeleccionados.contains('PAGADO')}">
+                            <label class="form-check-label">Pagados</label>
+                        </div>
+                        <button class="btn btn-sm btn-dark ms-2">Aplicar</button>
+                        <a href="/listar_pedidos" class="btn btn-sm btn-link text-muted">Limpiar</a>
+                    </form>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">#ID</th>
+                                <th>Cliente</th>
+                                <th>Tipo</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${listaPedidos}">
+                                <td class="ps-4 fw-bold text-muted" th:text="${p.idPedido}"></td>
+                                <td class="fw-bold" th:text="${p.cliente}"></td>
+                                <td>
+                                    <span th:if="${p.mesa != null}" class="badge bg-primary bg-opacity-10 text-primary">
+                                        <i class="fas fa-chair me-1"></i> Mesa <span th:text="${p.mesa.numero}"></span>
+                                    </span>
+                                    <span th:if="${p.mesa == null}" class="badge bg-dark bg-opacity-10 text-dark">
+                                        <i class="fas fa-shopping-bag me-1"></i> Llevar
+                                    </span>
+                                </td>
+                                <td class="text-muted small" th:text="${#temporals.format(p.fecha, 'dd/MM HH:mm')}"></td>
+                                <td class="fw-bold" th:text="'$' + ${p.total}"></td>
+                                <td>
+                                    <span class="badge-status"
+                                          th:classappend="${p.estado.name() == 'PAGADO'} ? 'bg-success text-white' : 
+                                          (${p.estado.name() == 'CANCELADO'} ? 'bg-secondary text-white' : 'bg-warning text-dark')"
+                                          th:text="${p.estado}"></span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a th:href="@{/pedidos/{id}(id=${p.idPedido})}" class="btn btn-sm btn-outline-primary">
+                                        Ver <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
-        <div class="card-body d-flex flex-wrap gap-3">
-
-
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       name="estados"
-                       value="CONFIRMADO"
-                       th:checked="${estadosSeleccionados != null and estadosSeleccionados.contains('CONFIRMADO')}">
-                <label class="form-check-label">Confirmado</label>
-            </div>
-
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       name="estados"
-                       value="PAGADO"
-                       th:checked="${estadosSeleccionados != null and estadosSeleccionados.contains('PAGADO')}">
-                <label class="form-check-label">Pagado</label>
-            </div>
-
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       name="estados"
-                       value="CANCELADO"
-                       th:checked="${estadosSeleccionados != null and estadosSeleccionados.contains('CANCELADO')}">
-                <label class="form-check-label">Cancelado</label>
-            </div>
-
-            <div class="ms-auto">
-                <button class="btn btn-primary btn-sm">
-                    Aplicar filtro
-                </button>
-
-                <a href="/listar_pedidos" class="btn btn-secondary btn-sm">
-                    Limpiar
-                </a>
-            </div>
-
-        </div>
-    </div>
-</form>
-
-
-    <!-- Usuario activo -->
-    <div class="alert alert-info mb-3">
-        Usuario activo:
-        <strong th:text="${usuarioActivo.username}"></strong>
-        (<span th:text="${usuarioActivo.rol}"></span>)
-    </div>
-
-    <!-- Tabla -->
-    <table class="table table-bordered table-hover bg-white">
-        <thead class="thead-dark">
-        <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Mesa / Tipo</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:each="pedido : ${listaPedidos}">
-            <td th:text="${pedido.idPedido}"></td>
-            <td th:text="${pedido.cliente}"></td>
-
-            <!-- Mesa o Para llevar -->
-            <td>
-                <span th:if="${pedido.tipoPedido.name() == 'MESA'}"
-                      class="badge badge-secondary"
-                      th:text="'Mesa ' + ${pedido.mesa.numero}">
-                </span>
-
-                <span th:if="${pedido.tipoPedido.name() == 'PARA_LLEVAR'}"
-                      class="badge badge-dark">
-                    Para llevar
-                </span>
-            </td>
-
-            <!-- Fecha -->
-            <td th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}"></td>
-
-            <!-- Total -->
-            <td th:text="'$ ' + ${pedido.total}"></td>
-
-            <!-- Estado -->
-            <td>
-                <span class="badge"
-                      th:text="${pedido.estado}"
-                      th:classappend="
-                        ${pedido.estado.name() == 'PAGADO'} ? 'badge-success' :
-                        (${pedido.estado.name() == 'CANCELADO'} ? 'badge-secondary' :
-                        (${pedido.estado.name() == 'CONFIRMADO'} ? 'badge-warning' :
-                        'badge-primary'))">
-                </span>
-            </td>
-
-            <!-- Acciones -->
-            <td>
-                <a th:href="@{/pedidos/{id}(id=${pedido.idPedido})}"
-                   class="btn btn-info btn-sm">
-                    Ver
-                </a>
-
-                <!-- SOLO ADMIN puede eliminar -->
-                <a th:if="${usuarioActivo.rol.name() == 'ADMIN'}"
-                   th:href="@{/eliminar_pedido/{id}(id=${pedido.idPedido})}"
-                   class="btn btn-danger btn-sm"
-                   onclick="return confirm('¿Eliminar este pedido?')">
-                    Eliminar
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <!-- Acciones -->
-    <div class="mt-4">
-        <a th:href="@{/nuevo_pedido}" class="btn btn-primary">
-            Nuevo Pedido
-        </a>
-
-        <a th:href="@{/pedidos}" class="btn btn-secondary">
-            Volver al menú
-        </a>
-    </div>
-
-</div>
-
-</body>
+    </body>
 </html>

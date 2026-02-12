@@ -1,13 +1,6 @@
 package uce.edu.MiPedido.Model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "producto")
@@ -25,6 +18,10 @@ public class Producto {
 
     @Column(nullable = false)
     private boolean disponible;
+
+    // --- CORRECCIÓN: Usamos TEXT en lugar de @Lob para PostgreSQL ---
+    @Column(columnDefinition = "TEXT")
+    private String imagenBase64;
 
     @ManyToOne
     @JoinColumn(name = "id_categoria")
@@ -65,11 +62,23 @@ public class Producto {
         this.disponible = disponible;
     }
 
+    public String getImagenBase64() {
+        return imagenBase64;
+    }
+
+    public void setImagenBase64(String imagenBase64) {
+        this.imagenBase64 = imagenBase64;
+    }
+
     public Categoria getCategoria() {
         return categoria;
     }
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public boolean tieneImagen() {
+        return this.imagenBase64 != null && !this.imagenBase64.isEmpty();
     }
 }

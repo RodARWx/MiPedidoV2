@@ -1,9 +1,9 @@
 package uce.edu.MiPedido.Service;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
 import uce.edu.MiPedido.Model.Categoria;
 import uce.edu.MiPedido.Model.Producto;
 import uce.edu.MiPedido.Repository.ProductoRepository;
@@ -14,7 +14,6 @@ public class ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    // Validación básica del producto
     public boolean esValido(Producto producto) {
         return producto.getNombre() != null
                 && !producto.getNombre().isEmpty()
@@ -23,7 +22,7 @@ public class ProductoService {
                 && producto.getCategoria().isActiva();
     }
 
-    // Guardar producto
+    @Transactional // Transacción para escritura
     public Producto guardar(Producto producto) {
         if (!esValido(producto)) {
             throw new IllegalArgumentException("Producto no válido");
@@ -31,45 +30,39 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
-    // Listar todos los productos
+    // --- CORRECCIÓN: Transacciones de lectura ---
+    @Transactional(readOnly = true)
     public List<Producto> listarTodos() {
         return productoRepository.findAll();
     }
 
-    // Listar productos por categoría
+    @Transactional(readOnly = true)
     public List<Producto> listarPorCategoria(Categoria categoria) {
         return productoRepository.findByCategoria(categoria);
     }
 
-    // Listar productos disponibles por categoría
+    @Transactional(readOnly = true)
     public List<Producto> listarDisponiblesPorCategoria(Categoria categoria) {
         return productoRepository.findByCategoriaAndDisponibleTrue(categoria);
     }
 
-    // Listar solo productos disponibles
+    @Transactional(readOnly = true)
     public List<Producto> listarDisponibles() {
         return productoRepository.findByDisponibleTrue();
     }
 
-    // Buscar producto por id
+    @Transactional(readOnly = true)
     public Producto buscarPorId(Long id) {
         return productoRepository.findById(id).orElse(null);
     }
+    // ---------------------------------------------
 
-    //No se puede eliminar un producto porque esta referenciado en un pedido
-    // Eliminar producto
-    /*public void eliminar(Long id) {
-        productoRepository.deleteById(id);
-    }*/
-    
+    @Transactional
     public void cambiarDisponibilidad(Long idProducto) {
-
         Producto producto = productoRepository.findById(idProducto).orElse(null);
-
         if (producto != null) {
             producto.setDisponible(!producto.isDisponible());
             productoRepository.save(producto);
         }
     }
-
 }

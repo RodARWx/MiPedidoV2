@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="fragments :: headerfiles"><title>Caja</title></head>
+    <body>
+
+        <div th:replace="fragments :: sidebar"></div>
+
+        <div class="main-content">
+            <h2 class="fw-bold mb-4">Gestión de Caja</h2>
+
+            <div th:if="${caja == null}" class="d-flex justify-content-center align-items-center" style="height: 60vh;">
+                <div class="card shadow-lg text-center p-5" style="max-width: 500px; width: 100%;">
+                    <div class="mb-4 text-secondary">
+                        <i class="fas fa-lock fa-4x"></i>
+                    </div>
+                    <h3 class="mb-3">La Caja está Cerrada</h3>
+                    <p class="text-muted mb-4">Ingresa el monto inicial para abrir el turno y comenzar a vender.</p>
+
+                    <form action="/caja/abrir" method="post">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" name="saldoInicial" class="form-control form-control-lg" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">ABRIR TURNO</button>
+                    </form>
+                </div>
+            </div>
+
+            <div th:if="${caja != null}">
+                <div class="row g-4 mb-5">
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="text-muted text-uppercase small fw-bold">Saldo Inicial</h6>
+                                <h3 class="text-dark fw-bold" th:text="'$' + ${caja.saldoInicial}"></h3>
+                                <i class="fas fa-coins text-secondary opacity-25 float-end mt-n4 fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100 bg-success bg-opacity-10">
+                            <div class="card-body">
+                                <h6 class="text-success text-uppercase small fw-bold">Ventas (Ingresos)</h6>
+                                <h3 class="text-success fw-bold" th:text="'+ $' + ${caja.totalIngresos}"></h3>
+                                <i class="fas fa-arrow-up text-success opacity-25 float-end mt-n4 fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100 bg-danger bg-opacity-10">
+                            <div class="card-body">
+                                <h6 class="text-danger text-uppercase small fw-bold">Gastos (Salidas)</h6>
+                                <h3 class="text-danger fw-bold" th:text="'- $' + ${caja.totalEgresos}"></h3>
+                                <i class="fas fa-arrow-down text-danger opacity-25 float-end mt-n4 fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+                            <div class="card-body">
+                                <h6 class="text-white text-uppercase small fw-bold opacity-75">Total en Caja</h6>
+                                <h3 class="text-white fw-bold" th:text="'$' + (${caja.saldoInicial} + ${caja.totalIngresos} - ${caja.totalEgresos})"></h3>
+                                <i class="fas fa-wallet text-white opacity-25 float-end mt-n4 fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0 fw-bold">Registrar Salida / Gasto</h5>
+                            </div>
+                            <div class="card-body">
+                                <form action="/caja/gasto" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label">Descripción del gasto</label>
+                                        <input type="text" name="descripcion" class="form-control" placeholder="Ej: Compra de hielo, pago proveedor..." required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Monto a retirar</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" step="0.01" name="monto" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100 fw-bold">
+                                        <i class="fas fa-minus-circle me-2"></i> REGISTRAR SALIDA
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100 border-danger">
+                            <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                <h4 class="text-danger fw-bold mb-3">Cierre de Turno</h4>
+                                <p class="text-muted mb-4">Al cerrar la caja, se generará el reporte final del día y no se podrán procesar más pagos hasta una nueva apertura.</p>
+
+                                <form action="/caja/cerrar" method="post" class="w-100">
+                                    <input type="hidden" name="idCaja" th:value="${caja.idCaja}">
+                                    <button type="submit" class="btn btn-danger btn-lg w-100 py-3" onclick="return confirm('¿Estás seguro de que deseas cerrar la caja? Esta acción es irreversible.')">
+                                        <i class="fas fa-store-slash me-2"></i> CERRAR CAJA
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

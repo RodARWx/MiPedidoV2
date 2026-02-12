@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="fragments :: headerfiles"><title>Reportes</title></head>
+    <body>
+
+        <div th:replace="fragments :: sidebar"></div>
+
+        <div class="main-content">
+            <h2 class="fw-bold mb-4">Reportes & Estadísticas</h2>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center p-5">
+                            <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-4 mb-3">
+                                <i class="fas fa-file-pdf fa-3x"></i>
+                            </div>
+                            <h4 class="fw-bold">Reporte de Ventas</h4>
+                            <p class="text-muted">Genera un PDF con el listado de productos más vendidos y el rendimiento diario.</p>
+
+                            <a href="/reportes/exportar/pdf" class="btn btn-danger px-4 py-2 mt-3 fw-bold">
+                                <i class="fas fa-download me-2"></i> DESCARGAR PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100 border-0 bg-light text-center">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-muted">
+                            <i class="fas fa-chart-line fa-3x mb-3 opacity-25"></i>
+                            <h5>Próximamente: Excel</h5>
+                            <p>Exportación detallada de transacciones.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
