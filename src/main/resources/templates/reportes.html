@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments :: headerfiles}"><title>Reportes Avanzados</title></head>
+    <body>
+
+        <div th:replace="~{fragments :: sidebar}"></div>
+
+        <div class="main-content">
+            <h2 class="fw-bold mb-4">Reportes y Estadísticas</h2>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body bg-light rounded">
+                    <form id="filterForm" action="/reportes" method="get" class="row align-items-end g-3">
+                        <div class="col-md-4">
+                            <label class="fw-bold text-muted small">Fecha Desde</label>
+                            <input type="date" id="dateInicio" name="inicio" class="form-control" th:value="${fechaInicio}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-bold text-muted small">Fecha Hasta</label>
+                            <input type="date" id="dateFin" name="fin" class="form-control" th:value="${fechaFin}">
+                        </div>
+                        <div class="col-md-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary fw-bold w-100">
+                                <i class="fas fa-search me-2"></i> FILTRAR
+                            </button>
+
+                            <a href="#" id="btnPdf" class="btn btn-danger" title="Exportar este reporte a PDF">
+                                <i class="fas fa-file-pdf fa-lg"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm border-start border-success border-5 h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><small class="text-uppercase text-muted fw-bold">Ventas</small><h3 class="text-success fw-bold mb-0" th:text="'$' + ${totalVentas}"></h3></div>
+                                <i class="fas fa-chart-line fa-2x text-success opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3"><h6 class="fw-bold m-0">Historial Detallado</h6></div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 text-center">
+                                    <thead class="bg-light">
+                                        <tr><th>Fecha</th><th>Inicial</th><th>Ingresos</th><th>Gastos</th><th>Estado</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="c : ${cajas}">
+                                            <td th:text="${#temporals.format(c.fechaApertura, 'dd/MM HH:mm')}"></td>
+                                            <td th:text="${c.saldoInicial}"></td>
+                                            <td class="text-success" th:text="${c.totalIngresos}"></td>
+                                            <td class="text-danger" th:text="${c.totalEgresos}"></td>
+                                            <td><span class="badge" th:classappend="${c.abierta} ? 'bg-success' : 'bg-secondary'" th:text="${c.abierta ? 'Abierta' : 'Cerrada'}"></span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const btnPdf = document.getElementById('btnPdf');
+                const dateInicio = document.getElementById('dateInicio');
+                const dateFin = document.getElementById('dateFin');
+
+                function updatePdfLink() {
+                    const inicio = dateInicio.value;
+                    const fin = dateFin.value;
+                    // Construir URL con parámetros
+                    btnPdf.href = `/reportes/exportar/pdf?inicio=${inicio}&fin=${fin}`;
+                }
+
+                // Actualizar al cargar y cuando cambien las fechas
+                updatePdfLink();
+                dateInicio.addEventListener('change', updatePdfLink);
+                dateFin.addEventListener('change', updatePdfLink);
+            });
+        </script>
+
+    </body>
+</html>

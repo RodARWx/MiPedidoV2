@@ -1,88 +1,113 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments :: headerfiles}"><title>Listado Productos</title></head>
+    <body>
 
-<head>
-    <meta charset="ISO-8859-1">
-    <title>Listado de Productos</title>
+        <div th:replace="~{fragments :: sidebar}"></div>
 
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          crossorigin="anonymous">
-</head>
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">Inventario de Productos</h2>
+                <a href="/nuevo_producto" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i> Nuevo</a>
+            </div>
 
-<body>
-<div class="container">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar producto...">
+                    </div>
 
-    <h1 class="mt-4">Listado de Productos</h1>
-    <hr>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="productosTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">ID</th>
+                                    <th>Imagen</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Precio</th>
+                                    <th>Estado</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr th:each="p : ${listaProductos}">
+                                    <td class="ps-4 text-muted" th:text="${p.idProducto}"></td>
+                                    <td>
+                                        <div th:if="${p.imagenBase64 != null}" class="rounded border" style="width: 40px; height: 40px; overflow: hidden;">
+                                            <img th:src="@{'data:image/jpeg;base64,'+${p.imagenBase64}}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                        <div th:if="${p.imagenBase64 == null}" class="rounded border bg-light d-flex align-items-center justify-content-center text-muted" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                    </td>
+                                    <td class="fw-bold" th:text="${p.nombre}"></td>
+                                    <td th:text="${p.categoria != null ? p.categoria.nombre : 'General'}"></td>
+                                    <td class="text-primary fw-bold" th:text="'$' + ${p.precio}"></td>
+                                    <td>
+                                        <span class="badge rounded-pill" th:classappend="${p.disponible} ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'"
+                                              th:text="${p.disponible ? 'Activo' : 'Inactivo'}"></span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a th:href="@{/editar_producto/{id}(id=${p.idProducto})}" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-    <table class="table table-bordered table-striped">
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center" id="pagination">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
 
-        <thead class="thead-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
+        <script>
+            // Script de Paginación y Búsqueda Frontend
+            document.addEventListener('DOMContentLoaded', function () {
+                const rowsPerPage = 10;
+                const table = document.getElementById('tableBody');
+                const rows = Array.from(table.getElementsByTagName('tr'));
+                const pagination = document.getElementById('pagination');
+                const searchInput = document.getElementById('searchInput');
+                let filteredRows = rows;
 
-        <tbody>
-        <tr th:each="producto : ${listaProductos}">
+                function displayRows(page) {
+                    const start = (page - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
 
-            <td th:text="${producto.idProducto}"></td>
-            <td th:text="${producto.nombre}"></td>
+                    rows.forEach(row => row.style.display = 'none'); // Ocultar todo
 
-            <!-- CATEGORÍA (DEFENSIVO) -->
-            <td th:text="${producto.categoria != null ? producto.categoria.nombre : 'Sin categoría'}"></td>
+                    filteredRows.slice(start, end).forEach(row => row.style.display = '');
+                }
 
-            <td th:text="${producto.precio}"></td>
+                function setupPagination() {
+                    pagination.innerHTML = '';
+                    const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
 
-            <!-- DISPONIBILIDAD -->
-            <td>
-                <span th:if="${producto.disponible}"
-                      class="badge badge-success">
-                    Disponible
-                </span>
+                    for (let i = 1; i <= pageCount; i++) {
+                        const li = document.createElement('li');
+                        li.className = 'page-item';
+                        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                        li.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            displayRows(i);
+                        });
+                        pagination.appendChild(li);
+                    }
+                    displayRows(1);
+                }
 
-                <span th:if="${!producto.disponible}"
-                      class="badge badge-danger">
-                    No disponible
-                </span>
-            </td>
+                searchInput.addEventListener('keyup', function (e) {
+                    const term = e.target.value.toLowerCase();
+                    filteredRows = rows.filter(row => row.innerText.toLowerCase().includes(term));
+                    setupPagination();
+                });
 
-            <!-- ACCIONES -->
-            <td>
-
-                <!-- EDITAR -->
-                <a th:href="@{/editar_producto/{id}(id=${producto.idProducto})}"
-                   class="btn btn-info btn-sm mb-1">
-                    Editar
-                </a>
-
-                <!-- CAMBIAR DISPONIBILIDAD -->
-                <a th:href="@{/producto/cambiar_disponibilidad/{id}(id=${producto.idProducto})}"
-                   class="btn btn-warning btn-sm mb-1">
-                    Cambiar estado
-                </a>
-
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <hr>
-
-    <a th:href="@{/nuevo_producto}" class="btn btn-primary">
-        Nuevo Producto
-    </a>
-
-    <a th:href="@{/productos}" class="btn btn-secondary">
-        Volver al menú Productos
-    </a>
-
-</div>
-</body>
+                setupPagination();
+            });
+        </script>
+    </body>
 </html>

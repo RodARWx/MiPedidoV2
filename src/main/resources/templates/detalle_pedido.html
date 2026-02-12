@@ -1,224 +1,103 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <title>Detalle del Pedido</title>
+    <head th:replace="~{fragments :: headerfiles}"><title>Detalle Pedido</title></head>
+    <body>
 
-        <!-- Bootstrap -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-              rel="stylesheet">
-    </head>
+        <div th:replace="~{fragments :: sidebar}"></div>
 
-    <body class="bg-light">
-
-        <div class="container mt-4">
-
-            <!-- TÍTULO -->
-            <h2 class="mb-4">Detalle del Pedido</h2>
-
-            <div th:if="${success}"
-                 class="alert alert-success text-center"
-                 id="successMessage">
-                <span th:text="${success}"></span>
-            </div>
-
-            <!-- MENSAJE DE ERROR -->
-            <div th:if="${error}" class="alert alert-danger">
-                <span th:text="${error}"></span>
-            </div>
-
-            <!-- INFO DEL PEDIDO -->
-            <div class="card mb-4">
-                <div class="card-body">
-
-                    <p>
-                        <strong>Cliente:</strong>
-                        <span th:text="${pedido.cliente}"></span>
-                    </p>
-
-                    <!-- MESA -->
-                    <p th:if="${pedido.mesa != null}">
-                        <strong>Mesa:</strong>
-                        <span class="badge bg-secondary"
-                              th:text="'Mesa ' + ${pedido.mesa.numero}">
-                        </span>
-                    </p>
-
-                    <!-- PARA LLEVAR -->
-                    <p th:if="${pedido.mesa == null}">
-                        <strong>Pedido:</strong>
-                        <span class="badge bg-dark">
-                            Para llevar
-                        </span>
-                    </p>
-
-                    <!-- ESTADO -->
-                    <p>
-                        <strong>Estado:</strong>
-                        <span class="badge"
-                              th:text="${pedido.estado}"
-                              th:classappend="
-                              ${pedido.estado.name() == 'PAGADO'} ? 'bg-success' :
-                              (${pedido.estado.name() == 'CANCELADO'} ? 'bg-secondary' :
-                              (${pedido.estado.name() == 'CONFIRMADO'} ? 'bg-warning text-dark' :
-                              'bg-primary'))">
-                        </span>
-                    </p>
-
-                </div>
-            </div>
-
-            <!-- AGREGAR PRODUCTO (solo si editable) -->
-            <div class="card mb-4"
-                 th:if="${pedido.estado.name() != 'PAGADO'
-                 && pedido.estado.name() != 'CANCELADO'}">
-
-                <div class="card-header">
-                    Agregar producto
-                </div>
-
-                <div class="card-body">
-                    <form th:action="@{/agregar_producto}" method="post" class="row g-3">
-
-                        <input type="hidden" name="idPedido"
-                               th:value="${pedido.idPedido}"/>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Producto</label>
-                            <select name="idProducto" class="form-select" required>
-                                <option value="">Seleccione un producto</option>
-                                <option th:each="p : ${productos}"
-                                        th:value="${p.idProducto}"
-                                        th:text="${p.nombre + ' ($' + p.precio + ')'}">
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Cantidad</label>
-                            <input type="number" name="cantidad"
-                                   min="1" value="1"
-                                   class="form-control" required>
-                        </div>
-
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-success w-100">
-                                Agregar
-                            </button>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-
-            <!-- TABLA DE PRODUCTOS -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    Productos del pedido
-                </div>
-
-                <div class="card-body p-0">
-                    <table class="table table-striped mb-0">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Producto</th>
-                                <th>Precio</th>
-                                <th>Cantidad</th>
-                                <th>Subtotal</th>
-                                <th th:if="${pedido.estado.name() != 'PAGADO'
-                                    && pedido.estado.name() != 'CANCELADO'}">
-                                    Acción
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <!-- PRODUCTOS -->
-                            <tr th:each="detalle : ${pedido.detalles}">
-                                <td th:text="${detalle.producto.nombre}"></td>
-                                <td th:text="${detalle.producto.precio}"></td>
-                                <td th:text="${detalle.cantidad}"></td>
-                                <td th:text="${detalle.subtotal}"></td>
-
-                                <td th:if="${pedido.estado.name() != 'PAGADO'
-                                    && pedido.estado.name() != 'CANCELADO'}">
-                                    <form th:action="@{/eliminar_detalle/{idDetalle}(idDetalle=${detalle.idDetalle})}"
-                                          method="post">
-                                        <input type="hidden" name="idPedido"
-                                               th:value="${pedido.idPedido}">
-                                        <button class="btn btn-danger btn-sm">
-                                            Eliminar
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-
-                            <!-- SIN PRODUCTOS -->
-                            <tr th:if="${pedido.detalles.isEmpty()}">
-                                <td colspan="5" class="text-center text-muted">
-                                    No hay productos en este pedido
-                                </td>
-                            </tr>
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TOTAL + ACCIONES -->
+        <div class="main-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <!-- TOTAL -->
-                <h4>
-                    Total: $
-                    <span th:text="${pedido.total}"></span>
-                </h4>
-
-                <div class="d-flex gap-2">
-
-                    <!-- CONFIRMAR PEDIDO -->
-                    <a th:if="${pedido.estado.name() == 'ABIERTO'
-                       && !pedido.detalles.isEmpty()}"
-                       th:href="@{/pedido/confirmar/{id}(id=${pedido.idPedido})}"
-                       class="btn btn-warning">
-                        Confirmar pedido
-                    </a>
-
-                    <!-- NUEVO PEDIDO (para mesero) -->
-                    <a th:if="${pedido.estado.name() == 'CONFIRMADO'}"
-                       href="/nuevo_pedido"
-                       class="btn btn-success">
-                        Nuevo pedido
-                    </a>
-
-                    <!-- PAGAR PEDIDO -->
-                    <form th:if="${pedido.estado.name() == 'CONFIRMADO'
-                          && !pedido.detalles.isEmpty()}"
-                          th:action="@{/pedidos/pagar/{id}(id=${pedido.idPedido})}"
-                          method="post">
-                        <button class="btn btn-danger">
-                            Marcar como pagado
-                        </button>
-                    </form>
-
-                    <!-- CANCELAR PEDIDO (mesero SÍ puede) -->
-                    <a th:if="${pedido.estado.name() != 'PAGADO'
-                       && pedido.estado.name() != 'CANCELADO'}"
-                       th:href="@{/pedido/cancelar/{id}(id=${pedido.idPedido})}"
-                       class="btn btn-outline-danger"
-                       onclick="return confirm('¿Cancelar este pedido?')">
-                        Cancelar pedido
-                    </a>
-
-                </div>
+                <h2 class="fw-bold">Pedido #<span th:text="${pedido.idPedido}"></span></h2>
+                <a href="/listar_pedidos" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i> Volver</a>
             </div>
 
-            <!-- VOLVER -->
-            <a href="/pedidos" class="btn btn-secondary">
-                Volver a pedidos
-            </a>
+            <div th:if="${success}" class="alert alert-success shadow-sm" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger shadow-sm" th:text="${error}"></div>
 
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 fw-bold">Productos</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0 align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Producto</th>
+                                        <th class="text-center">Cant.</th>
+                                        <th class="text-end">Precio U.</th>
+                                        <th class="text-end pe-4">Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="d : ${pedido.detalles}">
+                                        <td class="ps-4 fw-bold" th:text="${d.producto.nombre}"></td>
+                                        <td class="text-center"><span class="badge bg-secondary rounded-pill" th:text="${d.cantidad}"></span></td>
+                                        <td class="text-end" th:text="'$' + ${d.producto.precio}"></td>
+                                        <td class="text-end pe-4 fw-bold" th:text="'$' + ${d.subtotal}"></td>
+                                        <td>
+                                            <form th:if="${pedido.estado.name() != 'PAGADO' && pedido.estado.name() != 'CANCELADO'}"
+                                                  th:action="@{/eliminar_detalle/{id}(id=${d.idDetalle})}" method="post">
+                                                <input type="hidden" name="idPedido" th:value="${pedido.idPedido}">
+                                                <button class="btn btn-sm text-danger"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot class="bg-light">
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold pt-3">TOTAL:</td>
+                                        <td class="text-end pe-4 fw-bold fs-5 text-primary pt-3" th:text="'$' + ${pedido.total}"></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">Info Cliente</h5>
+                            <div class="mb-2"><strong>Cliente:</strong> <span th:text="${pedido.cliente}"></span></div>
+                            <div class="mb-2">
+                                <strong>Estado:</strong> 
+                                <span class="badge" th:classappend="${pedido.estado.name() == 'PAGADO'} ? 'bg-success' : 'bg-warning text-dark'" th:text="${pedido.estado}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-lg border-success" th:if="${pedido.estado.name() == 'CONFIRMADO'}">
+                        <div class="card-header bg-success text-white fw-bold">
+                            <i class="fas fa-cash-register me-2"></i> Cobrar
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/pedidos/pagar/{id}(id=${pedido.idPedido})}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Método de Pago</label>
+                                    <div class="d-grid gap-2">
+                                        <input type="radio" class="btn-check" name="metodoPago" id="pagoEfectivo" value="EFECTIVO" checked>
+                                        <label class="btn btn-outline-success" for="pagoEfectivo">
+                                            <i class="fas fa-money-bill-wave me-2"></i> Efectivo
+                                        </label>
+
+                                        <input type="radio" class="btn-check" name="metodoPago" id="pagoTransf" value="TRANSFERENCIA">
+                                        <label class="btn btn-outline-primary" for="pagoTransf">
+                                            <i class="fas fa-mobile-alt me-2"></i> Transferencia
+                                        </label>
+                                    </div>
+                                </div>
+                                <button class="btn btn-success btn-lg w-100 fw-bold">
+                                    COBRAR $<span th:text="${pedido.total}"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
     </body>
 </html>

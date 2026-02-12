@@ -1,167 +1,178 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Nuevo Pedido</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+    <head th:replace="fragments :: headerfiles"><title>Nuevo Pedido</title></head>
+    <body>
 
-<body class="bg-light">
+        <div th:replace="fragments :: sidebar"></div>
 
-<div class="container mt-4">
-    <h2 class="mb-4">Nuevo Pedido</h2>
+        <div class="main-content">
+            <div class="row h-100">
+                <div class="col-md-4">
+                    <h4 class="fw-bold mb-3">Datos del Pedido</h4>
 
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <form th:action="@{/guardar_pedido}" th:object="${pedido}" method="post" id="pedidoForm">
 
-    <form th:action="@{/guardar_pedido}" th:object="${pedido}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small fw-bold text-uppercase">Cliente</label>
+                                    <input type="text" th:field="*{cliente}" class="form-control" placeholder="Nombre del cliente" required>
+                                </div>
 
-        <!-- DATOS -->
-        <div class="card mb-4">
-            <div class="card-header">Datos del pedido</div>
-            <div class="card-body">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label text-muted small fw-bold text-uppercase">Tipo</label>
+                                        <select th:field="*{tipoPedido}" class="form-select" id="tipoPedidoSelect">
+                                            <option value="MESA">En Mesa</option>
+                                            <option value="PARA_LLEVAR">Para Llevar</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label text-muted small fw-bold text-uppercase">Mesa</label>
+                                        <select th:field="*{mesa}" class="form-select" id="mesaSelect">
+                                            <option value="">--</option>
+                                            <option th:each="m : ${mesasLibres}" th:value="${m.idMesa}" th:text="'Mesa ' + ${m.numero}"></option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Cliente</label>
-                    <input type="text" th:field="*{cliente}" class="form-control" required>
+                                <hr class="my-4">
+
+                                <h6 class="fw-bold mb-3">Productos Seleccionados</h6>
+                                <div class="table-responsive bg-light rounded p-2 mb-3" style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody id="carritoBody">
+                                            <tr><td colspan="4" class="text-center text-muted py-4">Carrito vacío</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <span class="h5 mb-0 text-muted">Total:</span>
+                                    <span class="h3 mb-0 fw-bold text-primary">$<span id="totalDisplay">0.00</span></span>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm" id="btnProcesar" disabled>
+                                    <i class="fas fa-check-circle me-2"></i> CREAR PEDIDO
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Tipo</label>
-                    <select th:field="*{tipoPedido}" class="form-select" id="tipoPedido" required>
-                        <option value="">Seleccione</option>
-                        <option value="MESA">En mesa</option>
-                        <option value="PARA_LLEVAR">Para llevar</option>
-                    </select>
-                </div>
+                <div class="col-md-8">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold mb-0">Menú</h4>
+                    </div>
 
-                <div class="mb-3" id="mesaContainer">
-                    <label class="form-label">Mesa</label>
-                    <select name="mesa.idMesa" class="form-select" id="mesaSelect">
-                        <option value="">Seleccione</option>
-                        <option th:each="m : ${mesasLibres}"
-                                th:value="${m.idMesa}"
-                                th:text="'Mesa ' + ${m.numero}">
-                        </option>
-                    </select>
+                    <div class="mb-4 overflow-auto pb-2">
+                        <div class="btn-group" role="group">
+                            <a href="/nuevo_pedido" 
+                               class="btn btn-outline-dark rounded-pill me-2 px-4"
+                               th:classappend="${categoriaSeleccionada == null} ? 'active bg-dark text-white'">
+                                Todos
+                            </a>
+                            <a th:each="cat : ${categorias}" 
+                               th:href="@{/nuevo_pedido(idCategoria=${cat.idCategoria})}"
+                               class="btn btn-outline-dark rounded-pill me-2 px-4"
+                               th:classappend="${categoriaSeleccionada == cat.idCategoria} ? 'active bg-dark text-white'"
+                               th:text="${cat.nombre}">
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4 col-lg-3" th:each="p : ${productos}">
+                            <div class="card h-100 hover-shadow border-0 shadow-sm product-card" 
+                                 style="cursor: pointer;"
+                                 th:onclick="agregarAlCarrito([[${p.idProducto}]], [[${p.nombre}]], [[${p.precio}]])">
+
+                                <div class="bg-light d-flex align-items-center justify-content-center text-secondary rounded-top" style="height: 120px;">
+                                    <i class="fas fa-hamburger fa-2x"></i>
+                                </div>
+
+                                <div class="card-body p-3 text-center">
+                                    <h6 class="card-title fw-bold mb-1 text-truncate" th:text="${p.nombre}"></h6>
+                                    <p class="card-text text-primary fw-bold mb-0" th:text="'$' + ${p.precio}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- PRODUCTOS -->
-        <div class="card mb-4">
-            <div class="card-header">Productos</div>
-            <div class="card-body">
+        <script>
+            let carrito = [];
+            const tbody = document.getElementById('carritoBody');
+            const totalSpan = document.getElementById('totalDisplay');
+            const btnProcesar = document.getElementById('btnProcesar');
+            const tipoSelect = document.getElementById('tipoPedidoSelect');
+            const mesaSelect = document.getElementById('mesaSelect');
 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <select id="productoSelect" class="form-select">
-                            <option value="">Producto</option>
-                            <option th:each="p : ${productos}"
-                                    th:value="${p.idProducto}"
-                                    th:data-precio="${p.precio}"
-                                    th:data-nombre="${p.nombre}"
-                                    th:text="${p.nombre + ' ($' + p.precio + ')'}">
-                            </option>
-                        </select>
-                    </div>
+            // Controlar visibilidad de mesa
+            tipoSelect.addEventListener('change', function () {
+                if (this.value === 'PARA_LLEVAR') {
+                    mesaSelect.value = "";
+                    mesaSelect.disabled = true;
+                } else {
+                    mesaSelect.disabled = false;
+                }
+            });
 
-                    <div class="col-md-3">
-                        <input type="number" id="cantidadInput" min="1" value="1" class="form-control">
-                    </div>
+            function agregarAlCarrito(id, nombre, precio) {
+                // Verificar si ya existe
+                const existente = carrito.find(item => item.id === id);
+                if (existente) {
+                    existente.cantidad++;
+                } else {
+                    carrito.push({id, nombre, precio, cantidad: 1});
+                }
+                renderizarCarrito();
+            }
 
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-success w-100" onclick="agregarProducto()">Agregar</button>
-                    </div>
-                </div>
+            function quitarDelCarrito(index) {
+                carrito.splice(index, 1);
+                renderizarCarrito();
+            }
 
-                <table class="table table-striped">
-                    <thead class="table-dark">
-                    <tr>
-                        <th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th>
-                    </tr>
-                    </thead>
-                    <tbody id="tablaProductos">
-                        <tr id="sinProductos">
-                            <td colspan="5" class="text-center text-muted">No hay productos</td>
-                        </tr>
-                    </tbody>
-                </table>
+            function renderizarCarrito() {
+                tbody.innerHTML = '';
+                let total = 0;
 
-                <h5 class="text-end">Total: $ <span id="total">0.00</span></h5>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between">
-            <a href="/pedidos" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary" id="btnCrear" disabled>Crear pedido</button>
-        </div>
-    </form>
-</div>
-
-<script>
-    const tipoPedido = document.getElementById('tipoPedido');
-    const mesaContainer = document.getElementById('mesaContainer');
-    const tabla = document.getElementById('tablaProductos');
-    const totalSpan = document.getElementById('total');
-    const btnCrear = document.getElementById('btnCrear');
-
-    let detalles = [];
-
-    tipoPedido.addEventListener('change', () => {
-        mesaContainer.style.display = tipoPedido.value === 'PARA_LLEVAR' ? 'none' : 'block';
-        if (tipoPedido.value === 'PARA_LLEVAR') document.getElementById('mesaSelect').value = '';
-    });
-
-    function agregarProducto() {
-        const select = document.getElementById('productoSelect');
-        const cantidad = parseInt(document.getElementById('cantidadInput').value);
-
-        if (!select.value || cantidad <= 0) return;
-
-        detalles.push({
-            idProducto: select.value,
-            nombre: select.selectedOptions[0].dataset.nombre,
-            precio: parseFloat(select.selectedOptions[0].dataset.precio),
-            cantidad
-        });
-
-        renderTabla();
-        btnCrear.disabled = false;
-    }
-
-    function eliminar(index) {
-        detalles.splice(index, 1);
-        renderTabla();
-        btnCrear.disabled = detalles.length === 0;
-    }
-
-    function renderTabla() {
-        tabla.innerHTML = '';
-        let total = 0;
-
-        detalles.forEach((d, i) => {
-            const subtotal = d.precio * d.cantidad;
-            total += subtotal;
-
-            tabla.innerHTML += `
-                <tr>
-                    <td>${d.nombre}</td>
-                    <td>${d.precio.toFixed(2)}</td>
-                    <td>${d.cantidad}</td>
-                    <td>${subtotal.toFixed(2)}</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-danger" onclick="eliminar(${i})">X</button>
-                    </td>
-
-                    <input type="hidden" name="detalles[${i}].producto.idProducto" value="${d.idProducto}">
-                    <input type="hidden" name="detalles[${i}].cantidad" value="${d.cantidad}">
-                </tr>
-            `;
-        });
-
-        totalSpan.innerText = total.toFixed(2);
-    }
-</script>
-
-</body>
+                if (carrito.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Carrito vacío</td></tr>';
+                    btnProcesar.disabled = true;
+                } else {
+                    carrito.forEach((item, index) => {
+                        total += item.precio * item.cantidad;
+                        const row = `
+                            <tr class="align-middle">
+                                <td>
+                                    <div class="fw-bold small">${item.nombre}</div>
+                                    <div class="text-muted small">$${item.precio}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">x${item.cantidad}</span>
+                                </td>
+                                <td class="text-end fw-bold small">
+                                    $${(item.precio * item.cantidad).toFixed(2)}
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-link text-danger p-0" onclick="quitarDelCarrito(${index})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <input type="hidden" name="detalles[${index}].producto.idProducto" value="${item.id}">
+                                    <input type="hidden" name="detalles[${index}].cantidad" value="${item.cantidad}">
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                    btnProcesar.disabled = false;
+                }
+                totalSpan.innerText = total.toFixed(2);
+            }
+        </script>
+    </body>
 </html>
